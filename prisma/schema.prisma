@@ -1,0 +1,313 @@
+// Addis POS — multi-tenant POS + inventory for Ethiopian grocery shops and restaurants.
+// Money is stored as integer santim (1 ETB = 100 santim) to avoid float rounding.
+// Every business table carries tenantId; queries must always filter by it.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BusinessMode {
+  GROCERY
+  RESTAURANT
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  CASHIER
+  INVENTORY
+  WAITER
+}
+
+enum Unit {
+  PIECE
+  KG
+  GRAM
+  LITER
+  BOTTLE
+  BOX
+  PACK
+}
+
+enum OrderStatus {
+  OPEN // restaurant: sent to table, not yet paid
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TELEBIRR
+  CBE_BIRR
+  MPESA
+  BANK_TRANSFER
+  CREDIT
+}
+
+enum MovementType {
+  PURCHASE
+  SALE
+  RETURN
+  ADJUSTMENT
+  DAMAGED
+  EXPIRED
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+enum ShiftStatus {
+  OPEN
+  CLOSED
+  AUDITED
+  DISPUTED
+}
+
+model Tenant {
+  id            String       @id @default(cuid())
+  name          String
+  mode          BusinessMode
+  tin           String? // Tax Identification Number printed on receipts
+  vatRegistered Boolean      @default(true)
+  locale        String       @default("am") // "am" | "en"
+  createdAt     DateTime     @default(now())
+
+  branches   Branch[]
+  users      User[]
+  categories Category[]
+  products   Product[]
+  customers  Customer[]
+  suppliers  Supplier[]
+}
+
+model Branch {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  name     String
+  address  String?
+
+  users     User[]
+  stock     StockLevel[]
+  orders    Order[]
+  shifts    Shift[]
+  tables    DiningTable[]
+  movements StockMovement[]
+
+  @@index([tenantId])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+  name      String
+  phone     String
+  pinHash   String? // staff sign in with phone + PIN
+  role      Role
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  cashierOrders Order[] @relation("cashier")
+  waiterOrders  Order[] @relation("waiter")
+  shifts        Shift[]
+
+  @@unique([tenantId, phone])
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  tenantId String
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  name     String
+  nameAm   String?
+  products Product[]
+
+  @@index([tenantId])
+}
+
+model Product {
+  id           String    @id @default(cuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id])
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  supplierId   String?
+  supplier     Supplier? @relation(fields: [supplierId], references: [id])
+  name         String
+  nameAm       String?
+  sku          String?
+  barcode      String?
+  unit         Unit      @default(PIECE)
+  soldByWeight Boolean   @default(false) // price is per kg; quantity entered from scale
+  price        Int // santim per unit
+  cost         Int       @default(0)
+  vatRate      Int       @default(1500) // basis points: 1500 = 15%
+  minStock     Decimal   @default(0) @db.Decimal(12, 3)
+  tracksStock  Boolean   @default(true) // false for made-to-order menu items
+  active       Boolean   @default(true)
+
+  stock     StockLevel[]
+  movements StockMovement[]
+  items     OrderItem[]
+
+  @@unique([tenantId, barcode])
+  @@index([tenantId])
+}
+
+model StockLevel {
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  branchId  String
+  branch    Branch  @relation(fields: [branchId], references: [id])
+  quantity  Decimal @default(0) @db.Decimal(12, 3)
+
+  @@id([productId, branchId])
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  tenantId  String
+  productId String
+  product   Product      @relation(fields: [productId], references: [id])
+  branchId  String
+  branch    Branch       @relation(fields: [branchId], references: [id])
+  type      MovementType
+  quantity  Decimal      @db.Decimal(12, 3) // signed: negative leaves stock
+  reason    String?
+  userId    String?
+  orderId   String?
+  expiresAt DateTime?
+  createdAt DateTime     @default(now())
+
+  @@index([tenantId, branchId, createdAt])
+}
+
+model Supplier {
+  id       String    @id @default(cuid())
+  tenantId String
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  name     String
+  phone    String?
+  products Product[]
+
+  @@index([tenantId])
+}
+
+model Customer {
+  id            String  @id @default(cuid())
+  tenantId      String
+  tenant        Tenant  @relation(fields: [tenantId], references: [id])
+  name          String
+  phone         String?
+  creditLimit   Int     @default(0)
+  creditBalance Int     @default(0) // santim owed (ዱቤ)
+  orders        Order[]
+
+  @@index([tenantId])
+}
+
+model DiningTable {
+  id       String  @id @default(cuid())
+  tenantId String
+  branchId String
+  branch   Branch  @relation(fields: [branchId], references: [id])
+  label    String
+  orders   Order[]
+
+  @@unique([branchId, label])
+}
+
+model Order {
+  id         String       @id @default(cuid())
+  tenantId   String
+  branchId   String
+  branch     Branch       @relation(fields: [branchId], references: [id])
+  number     Int // per-branch receipt number
+  status     OrderStatus
+  cashierId  String
+  cashier    User         @relation("cashier", fields: [cashierId], references: [id])
+  waiterId   String?
+  waiter     User?        @relation("waiter", fields: [waiterId], references: [id])
+  tableId    String?
+  table      DiningTable? @relation(fields: [tableId], references: [id])
+  customerId String?
+  customer   Customer?    @relation(fields: [customerId], references: [id])
+  shiftId    String?
+  shift      Shift?       @relation(fields: [shiftId], references: [id])
+  subtotal   Int // santim, before discount, VAT-inclusive
+  discount   Int          @default(0)
+  vatAmount  Int          @default(0)
+  total      Int
+  clientId   String? // id generated offline on the device, for idempotent sync
+  createdAt  DateTime     @default(now())
+  closedAt   DateTime?
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@unique([branchId, number])
+  @@unique([tenantId, clientId])
+  @@index([tenantId, createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String // snapshot at time of sale
+  unitPrice Int
+  quantity  Decimal @db.Decimal(12, 3)
+  vatRate   Int
+  lineTotal Int
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  orderId   String
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method    PaymentMethod
+  amount    Int
+  tendered  Int? // cash handed over, for change
+  reference String? // Telebirr / CBE Birr / bank transaction id
+  createdAt DateTime      @default(now())
+}
+
+model Shift {
+  id           String      @id @default(cuid())
+  tenantId     String
+  branchId     String
+  branch       Branch      @relation(fields: [branchId], references: [id])
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  status       ShiftStatus @default(OPEN)
+  openingFloat Int
+  expectedCash Int?
+  countedCash  Int?
+  openedAt     DateTime    @default(now())
+  closedAt     DateTime?
+  orders       Order[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  detail    Json?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
