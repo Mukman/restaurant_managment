@@ -166,6 +166,7 @@ const DICT = {
   byPayment: { en: "By payment method", am: "በክፍያ መንገድ" },
   topProducts: { en: "Top products", am: "ብዙ የተሸጡ" },
   revenue: { en: "Revenue", am: "ገቢ" },
+  lockedOut: { en: "Locked (reset PIN to unlock)", am: "ተቆልፏል (ለመክፈት ፒን ይቀይሩ)" },
 } as const;
 
 export type DictKey = keyof typeof DICT;

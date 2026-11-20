@@ -104,7 +104,7 @@ $env:TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/addis_test
 
 ## What works now
 
-- `/signup`: create a shop (grocery or restaurant), owner signs in with phone + PIN
+- `/signup`: create a shop (grocery or restaurant), owner signs in with phone + PIN. After 5 wrong PINs in a row that person is locked out for 15 minutes (the right PIN is refused too); an owner or manager resetting their PIN unlocks them at once, and the staff page shows who is locked
 - `/app/products`: add products with Amharic name, barcode, unit, sold-by-weight, opening and minimum stock
 - `/app/pos`: barcode/search, categories, weighed items, discount, VAT, payment (Cash with change,
   Telebirr / CBE Birr / M-Pesa / bank with reference, card, credit to a customer), printable receipt.
