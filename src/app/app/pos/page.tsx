@@ -1,6 +1,7 @@
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getLang } from "@/lib/lang";
+import { currentShift } from "@/lib/shift";
 import { PosClient, type PosProduct, type OpenOrder } from "./PosClient";
 
 export default async function PosPage() {
@@ -8,7 +9,8 @@ export default async function PosPage() {
   const lang = await getLang();
   const isRestaurant = s.mode === "RESTAURANT";
 
-  const [tenant, products, customers, tables, waiters, open] = await Promise.all([
+  const [shift, tenant, products, customers, tables, waiters, open] = await Promise.all([
+    currentShift(s),
     db.tenant.findUniqueOrThrow({ where: { id: s.tenantId } }),
     db.product.findMany({
       where: { tenantId: s.tenantId, active: true },
@@ -51,6 +53,7 @@ export default async function PosPage() {
     <PosClient
       lang={lang}
       mode={s.mode}
+      hasShift={!!shift}
       shop={{ name: tenant.name, tin: tenant.tin }}
       cashier={s.name}
       products={posProducts}

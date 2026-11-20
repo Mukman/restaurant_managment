@@ -4,6 +4,7 @@ import { test, before } from "node:test";
 import assert from "node:assert/strict";
 import { db } from "../src/lib/db";
 import { checkout, CheckoutError } from "../src/lib/checkout";
+import { openShift } from "../src/lib/shift";
 import type { SessionData } from "../src/lib/session";
 
 let g: SessionData, r: SessionData;
@@ -14,7 +15,9 @@ async function makeTenant(mode: "GROCERY" | "RESTAURANT"): Promise<SessionData> 
   const tenant = await db.tenant.create({ data: { name: `Test ${mode}`, mode } });
   const branch = await db.branch.create({ data: { tenantId: tenant.id, name: "Main" } });
   const user = await db.user.create({ data: { tenantId: tenant.id, branchId: branch.id, name: "Cashier", phone: `09${Date.now() % 1e8}`, role: "CASHIER" } });
-  return { userId: user.id, tenantId: tenant.id, branchId: branch.id, role: "CASHIER", name: "Cashier", mode };
+  const session: SessionData = { userId: user.id, tenantId: tenant.id, branchId: branch.id, role: "CASHIER", name: "Cashier", mode };
+  await openShift(session, 0);
+  return session;
 }
 async function product(s: SessionData, data: { name: string; price: number; stock: number; soldByWeight?: boolean; tracksStock?: boolean; barcode?: string }) {
   const p = await db.product.create({ data: { tenantId: s.tenantId, name: data.name, price: data.price, soldByWeight: !!data.soldByWeight, tracksStock: data.tracksStock ?? true, barcode: data.barcode } });

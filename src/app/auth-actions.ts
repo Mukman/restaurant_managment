@@ -4,16 +4,10 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { normalizePhone } from "@/lib/phone";
 import { SESSION_COOKIE, sessionCookieOptions, signSession } from "@/lib/session";
 
 export type FormState = { error?: string };
-
-// Ethiopian mobile numbers: 09XXXXXXXX / 07XXXXXXXX or +2519/+2517 forms; stored as 09XXXXXXXX.
-function normalizePhone(raw: string): string | null {
-  const d = raw.replace(/[^\d+]/g, "");
-  const m = d.match(/^(?:\+?251|0)?([79]\d{8})$/);
-  return m ? `0${m[1]}` : null;
-}
 
 const pinSchema = z.string().regex(/^\d{4,6}$/, "PIN must be 4–6 digits");
 

@@ -14,7 +14,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const nav = [
     { href: "/app", label: t("dashboard"), roles: ["OWNER", "MANAGER"] },
     { href: "/app/pos", label: t("pos"), roles: ["OWNER", "MANAGER", "CASHIER", "WAITER"] },
+    { href: "/app/shift", label: t("shift"), roles: ["OWNER", "MANAGER", "CASHIER", "WAITER"] },
     { href: "/app/products", label: t("products"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
+    { href: "/app/staff", label: t("staff"), roles: ["OWNER", "MANAGER"] },
   ].filter((n) => n.roles.includes(s.role));
 
   return (

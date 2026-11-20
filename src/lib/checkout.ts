@@ -3,6 +3,7 @@ import { Prisma, type PaymentMethod } from "@prisma/client";
 import { z } from "zod";
 import { db } from "./db";
 import { cartTotals } from "./money";
+import { currentShift } from "./shift";
 import type { SessionData } from "./session";
 
 export class CheckoutError extends Error {}
@@ -162,10 +163,13 @@ export async function checkout(s: SessionData, raw: unknown) {
       if (order.total <= 0 && input.action === "pay") throw new CheckoutError("Total must be above zero");
 
       if (input.action === "pay") {
+        // Cash is accounted for per shift, so the payment lands in whoever's shift takes it.
+        const shift = await currentShift(s, tx);
+        if (!shift) throw new CheckoutError("Open a shift before taking payment");
         await takePayments(tx, s, order, input.payments);
         order = await tx.order.update({
           where: { id: order.id },
-          data: { status: "COMPLETED", closedAt: new Date(), clientId: input.clientId },
+          data: { status: "COMPLETED", closedAt: new Date(), clientId: input.clientId, shiftId: shift.id },
         });
       } else {
         // Only stamp clientId on the request that created/changed it, so retries stay idempotent.
