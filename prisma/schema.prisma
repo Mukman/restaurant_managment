@@ -65,6 +65,7 @@ enum MovementType {
 enum CreditEntryType {
   SALE // customer took goods on credit (owes more)
   REPAYMENT // customer paid some of it back (owes less)
+  REFUND // a credit sale was refunded (owes less)
 }
 
 enum ShiftStatus {
@@ -259,6 +260,7 @@ model Order {
 
   items    OrderItem[]
   payments Payment[]
+  refunds  Refund[]
 
   @@unique([branchId, number])
   @@unique([tenantId, clientId])
@@ -276,6 +278,8 @@ model OrderItem {
   quantity  Decimal @db.Decimal(12, 3)
   vatRate   Int
   lineTotal Int
+
+  refundItems RefundItem[]
 }
 
 model Payment {
@@ -335,4 +339,41 @@ model CreditEntry {
 
   @@index([tenantId, customerId, createdAt])
   @@index([shiftId])
+}
+
+// Money given back for part or all of a completed order. Each refund goes out by one method.
+model Refund {
+  id        String        @id @default(cuid())
+  tenantId  String
+  orderId   String
+  order     Order         @relation(fields: [orderId], references: [id])
+  shiftId   String // the shift whose till (or accounts) paid the refund out
+  userId    String
+  method    PaymentMethod
+  amount    Int // santim, VAT-inclusive
+  vatAmount Int           @default(0)
+  reference String? // Telebirr / bank reversal id
+  reason    String
+  clientId  String? // device-generated, makes a retried refund safe
+  createdAt DateTime      @default(now())
+
+  items RefundItem[]
+
+  @@unique([tenantId, clientId])
+  @@index([tenantId, createdAt])
+  @@index([shiftId])
+  @@index([orderId])
+}
+
+model RefundItem {
+  id          String    @id @default(cuid())
+  refundId    String
+  refund      Refund    @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  quantity    Decimal   @db.Decimal(12, 3)
+  amount      Int // santim returned for this line
+  restocked   Boolean // false for spoiled or already-consumed goods
+
+  @@index([orderItemId])
 }

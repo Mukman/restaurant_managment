@@ -7,7 +7,8 @@ import { db } from "@/lib/db";
 import { normalizePhone } from "@/lib/phone";
 import { SESSION_COOKIE, sessionCookieOptions, signSession } from "@/lib/session";
 
-export type FormState = { error?: string };
+// `values` hands back what was typed (never the PIN) so the form can refill after an error.
+export type FormState = { error?: string; values?: Record<string, string> };
 
 const pinSchema = z.string().regex(/^\d{4,6}$/, "PIN must be 4–6 digits");
 
@@ -26,6 +27,9 @@ async function startSession(userId: string) {
 }
 
 export async function signup(_: FormState, form: FormData): Promise<FormState> {
+  const values = Object.fromEntries(
+    ["shopName", "name", "phone", "tin", "mode"].map((k) => [k, String(form.get(k) ?? "")]),
+  );
   const parsed = z
     .object({
       shopName: z.string().trim().min(2, "Enter your business name").max(80),
@@ -36,13 +40,13 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
       tin: z.string().trim().max(20).optional(),
     })
     .safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { error: parsed.error.issues[0].message, values };
   const phone = normalizePhone(parsed.data.phone);
-  if (!phone) return { error: "Enter a valid Ethiopian phone number" };
+  if (!phone) return { error: "Enter a valid Ethiopian phone number", values };
 
   // Phone numbers are unique per tenant, but an owner should only ever have one shop per number.
   const taken = await db.user.findFirst({ where: { phone, role: "OWNER" } });
-  if (taken) return { error: "This phone number already has a shop. Sign in instead." };
+  if (taken) return { error: "This phone number already has a shop. Sign in instead.", values };
 
   const pinHash = await bcrypt.hash(parsed.data.pin, 10);
   const user = await db.$transaction(async (tx) => {
@@ -66,7 +70,7 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
 export async function login(_: FormState, form: FormData): Promise<FormState> {
   const phone = normalizePhone(String(form.get("phone") ?? ""));
   const pin = String(form.get("pin") ?? "");
-  const generic = { error: "Wrong phone number or PIN" };
+  const generic = { error: "Wrong phone number or PIN", values: { phone: String(form.get("phone") ?? "") } };
   if (!phone || !pinSchema.safeParse(pin).success) return generic;
 
   // A phone can belong to staff at several shops; accept the first whose PIN matches.

@@ -1,11 +1,12 @@
 "use client";
-import { useActionState, useTransition } from "react";
+import { useTransition } from "react";
+import { useServerForm } from "@/lib/useServerForm";
 import { closeShiftAction, openShiftAction, reviewShiftAction, type ShiftFormState } from "./actions";
 
 export function OpenShiftForm({ t }: { t: Record<string, string> }) {
-  const [state, action, pending] = useActionState<ShiftFormState, FormData>(openShiftAction, {});
+  const { state, onSubmit, pending } = useServerForm<ShiftFormState>(openShiftAction, {}, { resetOnOk: false });
   return (
-    <form action={action} className="panel max-w-sm">
+    <form onSubmit={onSubmit} className="panel max-w-sm">
       <h2 className="font-extrabold mb-4">{t.openShift}</h2>
       {state.error && <div className="error-box">{state.error}</div>}
       <label className="field"><span>{t.openingCash}</span>
@@ -17,9 +18,9 @@ export function OpenShiftForm({ t }: { t: Record<string, string> }) {
 }
 
 export function CloseShiftForm({ t, expected }: { t: Record<string, string>; expected: string }) {
-  const [state, action, pending] = useActionState<ShiftFormState, FormData>(closeShiftAction, {});
+  const { state, onSubmit, pending } = useServerForm<ShiftFormState>(closeShiftAction, {}, { resetOnOk: false });
   return (
-    <form action={action} className="panel max-w-sm">
+    <form onSubmit={onSubmit} className="panel max-w-sm">
       <h2 className="font-extrabold mb-1">{t.closeShift}</h2>
       <p className="text-sm mb-4" style={{ color: "var(--ink-soft)" }}>{t.expectedCash}: <b>{expected}</b></p>
       {state.error && <div className="error-box">{state.error}</div>}

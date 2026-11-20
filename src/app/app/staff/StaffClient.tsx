@@ -1,15 +1,14 @@
 "use client";
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
+import { useServerForm } from "@/lib/useServerForm";
 import { addStaffAction, resetPinAction, setActiveAction, type StaffFormState } from "./actions";
 
 export interface StaffRow { id: string; name: string; phone: string; role: string; active: boolean; manageable: boolean }
 
 export function StaffClient({ rows, roles, t }: { rows: StaffRow[]; roles: string[]; t: Record<string, string> }) {
-  const [state, action, pending] = useActionState<StaffFormState, FormData>(addStaffAction, {});
-  const ref = useRef<HTMLFormElement>(null);
+  const { state, onSubmit, pending } = useServerForm<StaffFormState>(addStaffAction, {});
   const [msg, setMsg] = useState<string | null>(null);
   const [, start] = useTransition();
-  useEffect(() => { if (state.ok) ref.current?.reset(); }, [state]);
 
   const report = (r: StaffFormState) => setMsg(r.error ?? null);
 
@@ -45,7 +44,7 @@ export function StaffClient({ rows, roles, t }: { rows: StaffRow[]; roles: strin
           </tbody>
         </table>
       </div>
-      <form ref={ref} action={action} className="panel">
+      <form onSubmit={onSubmit} className="panel">
         <h2 className="font-extrabold mb-4">{t.addStaff}</h2>
         {state.error && <div className="error-box">{state.error}</div>}
         <label className="field"><span>{t.name}</span><input className="input" name="name" required /></label>

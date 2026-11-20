@@ -112,6 +112,19 @@ const DICT = {
   repayment: { en: "Repayment", am: "ክፍያ" },
   creditOwed: { en: "Credit owed", am: "የዱቤ ዕዳ" },
   cashRepayments: { en: "Cash repayments (credit)", am: "የዱቤ ክፍያ (ጥሬ ገንዘብ)" },
+  refund: { en: "Refund", am: "ገንዘብ መልስ" },
+  refundSaved: { en: "Refund recorded", am: "ተመላሽ ተመዝግቧል" },
+  refunded: { en: "Refunded", am: "የተመለሰ" },
+  fullyRefunded: { en: "Fully refunded", am: "ሙሉ በሙሉ ተመልሷል" },
+  completed: { en: "Completed", am: "የተጠናቀቀ" },
+  item: { en: "Item", am: "ዕቃ" },
+  refundQty: { en: "Quantity to refund", am: "የሚመለስ ብዛት" },
+  restock: { en: "Back to stock", am: "ወደ ክምችት መልስ" },
+  canRefund: { en: "Can refund", am: "መመለስ የሚቻል" },
+  refundMethod: { en: "Pay back by", am: "የሚመለስበት መንገድ" },
+  reason: { en: "Reason", am: "ምክንያት" },
+  cashRefunds: { en: "Cash refunds", am: "የተመለሰ ጥሬ ገንዘብ" },
+  netSales: { en: "after refunds", am: "ከተመለሰ በኋላ" },
 } as const;
 
 export type DictKey = keyof typeof DICT;

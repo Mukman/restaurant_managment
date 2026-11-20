@@ -13,12 +13,14 @@ export default async function Dashboard() {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
 
-  const [sales, open, stock, owed] = await Promise.all([
+  const [sales, refunds, open, stock, owed] = await Promise.all([
+    // A sale that was later refunded still happened today; the refund is taken off below.
     db.order.aggregate({
-      where: { tenantId: s.tenantId, branchId: s.branchId, status: "COMPLETED", closedAt: { gte: start } },
+      where: { tenantId: s.tenantId, branchId: s.branchId, status: { in: ["COMPLETED", "REFUNDED"] }, closedAt: { gte: start } },
       _sum: { total: true },
       _count: true,
     }),
+    db.refund.aggregate({ where: { tenantId: s.tenantId, order: { branchId: s.branchId }, createdAt: { gte: start } }, _sum: { amount: true } }),
     db.order.count({ where: { tenantId: s.tenantId, branchId: s.branchId, status: "OPEN" } }),
     db.stockLevel.findMany({
       where: { branchId: s.branchId, product: { tenantId: s.tenantId, active: true, tracksStock: true } },
@@ -29,7 +31,7 @@ export default async function Dashboard() {
   const low = stock.filter((x) => Number(x.quantity) <= Number(x.product.minStock));
 
   const kpis = [
-    [t("todaySales"), formatETB(sales._sum.total ?? 0, lang)],
+    [`${t("todaySales")} (${t("netSales")})`, formatETB((sales._sum.total ?? 0) - (refunds._sum.amount ?? 0), lang)],
     [t("todayOrders"), String(sales._count)],
     ...(s.mode === "RESTAURANT" ? [[t("openOrders"), String(open)]] : []),
     [t("lowStock"), String(low.length)],
