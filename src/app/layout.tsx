@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Addis POS",
   description: "Point of sale and inventory for Ethiopian shops and restaurants",
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#2b4f3d" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#2b4f3d" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
