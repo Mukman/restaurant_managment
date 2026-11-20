@@ -34,12 +34,15 @@ export function lineTotal(line: CartLine): number {
 export function cartTotals(lines: CartLine[], discount = 0) {
   const subtotal = lines.reduce((s, l) => s + lineTotal(l), 0);
   const d = Math.min(Math.max(discount, 0), subtotal);
-  let vat = 0;
+  // Sum net amounts per VAT rate first, then round once per rate (not per line).
+  const byRate = new Map<number, number>();
   for (const l of lines) {
     const gross = lineTotal(l);
-    const share = subtotal === 0 ? 0 : gross - Math.round((gross * d) / subtotal);
-    vat += vatIncluded(share, l.vatRate);
+    const net = subtotal === 0 ? 0 : gross - (gross * d) / subtotal;
+    byRate.set(l.vatRate, (byRate.get(l.vatRate) ?? 0) + net);
   }
+  let vat = 0;
+  for (const [rate, amount] of byRate) vat += vatIncluded(amount, rate);
   return { subtotal, discount: d, vat, total: subtotal - d };
 }
 
