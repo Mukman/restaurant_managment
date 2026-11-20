@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PAYMENT_LABELS, translator, type Lang } from "@/lib/i18n";
 import { cartTotals, formatETB, toSantim } from "@/lib/money";
@@ -32,6 +33,7 @@ const NEEDS_REF: Method[] = ["TELEBIRR", "CBE_BIRR", "MPESA", "BANK_TRANSFER"];
 interface Props {
   lang: Lang;
   mode: "GROCERY" | "RESTAURANT";
+  hasShift: boolean;
   shop: { name: string; tin: string | null };
   cashier: string;
   products: PosProduct[];
@@ -131,6 +133,9 @@ export function PosClient(props: Props) {
     <div className="grid lg:grid-cols-[1fr_360px] lg:h-[calc(100vh-56px)]">
       {/* Products */}
       <section className="p-4 lg:overflow-y-auto">
+        {!props.hasShift && (
+          <Link href="/app/shift" className="block mb-3 rounded-lg px-4 py-3 font-bold badge-warn">{t("openFirst")} →</Link>
+        )}
         {isRestaurant && props.openOrders.length > 0 && (
           <div className="mb-4">
             <div className="text-xs font-bold uppercase mb-2" style={{ color: "var(--ink-faint)" }}>{t("openOrders")}</div>
@@ -246,7 +251,7 @@ export function PosClient(props: Props) {
             <button className="btn btn-secondary flex-[2]" disabled={cart.length === 0 || pending} onClick={sendToTable}>{t("sendToTable")}</button>
           )}
           {!editingOrder && (
-            <button className="btn btn-primary flex-[2]" disabled={cart.length === 0 || pending || totals.total <= 0} onClick={() => { setError(null); setPaying({ total: totals.total }); }}>
+            <button className="btn btn-primary flex-[2]" disabled={!props.hasShift || cart.length === 0 || pending || totals.total <= 0} onClick={() => { setError(null); setPaying({ total: totals.total }); }}>
               {t("charge")}
             </button>
           )}

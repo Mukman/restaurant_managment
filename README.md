@@ -27,7 +27,7 @@ Both modes share products, stock, payments, shifts and reports.
 ```bash
 cp .env.example .env   # set DATABASE_URL and AUTH_SECRET
 npm install
-npx prisma migrate deploy   # creates the tables
+npx prisma migrate deploy   # creates the tables (Supabase: use the Session pooler URL, see .env.example)
 npm run dev                 # open http://localhost:3000/signup
 npm test                    # checkout tests (needs a Postgres in DATABASE_URL; use a throwaway DB)
 ```
@@ -39,6 +39,8 @@ npm test                    # checkout tests (needs a Postgres in DATABASE_URL; 
 - `/app/pos`: barcode/search, categories, weighed items, discount, VAT, payment (Cash with change,
   Telebirr / CBE Birr / M-Pesa / bank with reference, card, credit to a customer), printable receipt.
   Restaurant mode adds tables, waiters, open orders, add items, pay later.
+- `/app/shift`: open a shift with the cash in the till, close it with a cash count; expected cash = opening cash + cash sales (mobile money and card are not cash). Owner/manager marks closed shifts audited or disputed. Taking payment requires an open shift.
+- `/app/staff`: owner/manager adds cashiers, waiters and inventory staff (owner can also add managers), resets PINs, deactivates people
 - `/app`: today's sales, order count, low stock
 ```
 
