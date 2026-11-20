@@ -150,6 +150,15 @@ const DICT = {
   margin: { en: "Margin", am: "ትርፍ" },
   balanceDue: { en: "Balance due", am: "ቀሪ ዕዳ" },
   supplierPaidFromTill: { en: "Supplier payments from till", am: "ከሳጥን ለአቅራቢ የተከፈለ" },
+  offlineBanner: { en: "No internet. Cash and mobile-money sales are saved on this device and sent when the connection is back.", am: "ኢንተርኔት የለም። የጥሬ ገንዘብና የሞባይል ክፍያ ሽያጮች በዚህ መሣሪያ ይቀመጡና ግንኙነት ሲመለስ ይላካሉ።" },
+  waitingSync: { en: "sales waiting to be sent", am: "ለመላክ የሚጠባበቁ ሽያጮች" },
+  syncNow: { en: "Send now", am: "አሁን ላክ" },
+  offlineSale: { en: "OFFLINE SALE (not sent yet)", am: "ከመስመር ውጭ ሽያጭ (ገና አልተላከም)" },
+  needsInternet: { en: "This needs an internet connection. Credit sales and table orders cannot be taken offline.", am: "ይህ ኢንተርኔት ይፈልጋል። የዱቤ ሽያጭና የጠረጴዛ ትዕዛዝ ከመስመር ውጭ አይቻልም።" },
+  syncFailed: { en: "The server did not accept this sale", am: "አገልጋዩ ይህን ሽያጭ አልተቀበለውም" },
+  retry: { en: "Try again", am: "እንደገና ሞክር" },
+  discard: { en: "Discard", am: "አስወግድ" },
+  discardWarn: { en: "Discard this sale? It will NOT be recorded.", am: "ይህ ሽያጭ ይወገድ? አይመዘገብም።" },
 } as const;
 
 export type DictKey = keyof typeof DICT;

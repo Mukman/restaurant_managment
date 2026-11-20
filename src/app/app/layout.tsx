@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoutForm } from "@/components/LogoutForm";
 import { LangToggle } from "@/components/LangToggle";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -32,11 +33,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link key={n.href} href={n.href} className="px-3 py-2 rounded-lg font-semibold hover:bg-white/10">{n.label}</Link>
           ))}
         </nav>
-        <form action={logout} className="md:mt-auto">
+        <LogoutForm action={logout} className="md:mt-auto">
           <div className="hidden md:block text-sm font-bold">{s.name}</div>
           <div className="hidden md:block text-xs mb-2" style={{ color: "#8fa396" }}>{s.role}</div>
           <button className="text-sm font-semibold opacity-80 hover:opacity-100">{t("signOut")}</button>
-        </form>
+        </LogoutForm>
       </aside>
       <div className="min-w-0">
         <header className="h-14 bg-white border-b flex items-center justify-end px-4 gap-3" style={{ borderColor: "var(--line)" }}>
