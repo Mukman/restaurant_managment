@@ -2,7 +2,7 @@ import { AppShell } from "@/components/AppShell";
 import { LangToggle } from "@/components/LangToggle";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { translator } from "@/lib/i18n";
+import { translator, type DictKey } from "@/lib/i18n";
 import { getLang } from "@/lib/lang";
 import { logout } from "../auth-actions";
 
@@ -28,7 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <AppShell
       tenantName={tenant.name}
       userName={s.name}
-      role={s.role}
+      role={t(`role_${s.role}` as DictKey)}
       nav={nav.map(({ href, label }) => ({ href, label }))}
       signOutLabel={t("signOut")}
       menuLabel={t("more")}

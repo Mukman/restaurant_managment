@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
 import { toSantim } from "@/lib/money";
@@ -13,9 +14,9 @@ async function run(fn: () => Promise<unknown>): Promise<SupplierFormState> {
     revalidatePath("/app", "layout");
     return { ok: true };
   } catch (e) {
-    if (e instanceof SupplierError || e instanceof PurchaseError) return { error: e.message };
+    if (e instanceof SupplierError || e instanceof PurchaseError) return { error: await localized(e.message) };
     console.error(e);
-    return { error: "Something went wrong. Try again." };
+    return { error: await localized("Something went wrong. Try again.") };
   }
 }
 

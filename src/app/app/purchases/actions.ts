@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
 import { toSantim } from "@/lib/money";
@@ -41,11 +42,11 @@ export async function receiveStockAction(input: ReceiveInput): Promise<ReceiveRe
     revalidatePath("/app", "layout");
     return { ok: true, id: p.id };
   } catch (e) {
-    if (e instanceof PurchaseError) return { error: e.message };
+    if (e instanceof PurchaseError) return { error: await localized(e.message) };
     // zod errors carry a readable first message
     const msg = (e as { issues?: { message: string }[] }).issues?.[0]?.message;
-    if (msg) return { error: msg };
+    if (msg) return { error: await localized(msg) };
     console.error(e);
-    return { error: "Something went wrong. Try again." };
+    return { error: await localized("Something went wrong. Try again.") };
   }
 }

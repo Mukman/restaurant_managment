@@ -6,9 +6,10 @@ import { SignupForm } from "./SignupForm";
 const KEYS: DictKey[] = ["shopName", "businessType", "grocery", "restaurant", "yourName", "phone", "pin", "tin", "signUp", "haveAccount"];
 
 export default async function SignupPage() {
-  const t = translator(await getLang());
+  const lang = await getLang();
+  const t = translator(lang);
   return (
-    <AuthCard title={t("signUp")}>
+    <AuthCard title={t("signUp")} brand={t("appName")} lang={lang}>
       <SignupForm t={Object.fromEntries(KEYS.map((k) => [k, t(k)]))} />
     </AuthCard>
   );

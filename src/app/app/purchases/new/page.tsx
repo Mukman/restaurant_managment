@@ -5,7 +5,7 @@ import { getLang } from "@/lib/lang";
 import { formatETB } from "@/lib/money";
 import { NewPurchaseForm } from "../NewPurchaseForm";
 
-const KEYS: DictKey[] = ["supplier", "invoiceNo", "product", "quantity", "unitCost", "expiry", "addLine", "note", "paidNow", "payment", "reference", "fromTill", "total", "receiveStock"];
+const KEYS: DictKey[] = ["supplier", "invoiceNo", "product", "quantity", "unitCost", "expiry", "addLine", "note", "paidNow", "payment", "reference", "fromTill", "total", "receiveStock", "removeLabel", "etb"];
 
 export default async function NewPurchasePage({ searchParams }: { searchParams: Promise<{ supplier?: string }> }) {
   const s = await requireSession(["OWNER", "MANAGER", "INVENTORY"]);

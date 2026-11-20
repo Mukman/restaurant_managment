@@ -1,3 +1,4 @@
+import { localized } from "@/lib/errors";
 import { requireSession } from "@/lib/auth";
 import { translator, PAYMENT_LABELS } from "@/lib/i18n";
 import { getLang } from "@/lib/lang";
@@ -17,7 +18,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     range = parseRange(q.from, q.to);
     r = await salesReport(s, range);
   } catch (e) {
-    if (e instanceof ReportError) error = e.message;
+    if (e instanceof ReportError) error = await localized(e.message);
     else throw e;
   }
   const f = (n: number) => formatETB(n, lang);

@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireSession } from "@/lib/auth";
@@ -25,7 +26,7 @@ export async function createProduct(_: ProductFormState, form: FormData): Promis
   const s = await requireSession(["OWNER", "MANAGER", "INVENTORY"]);
   const raw = Object.fromEntries([...form.entries()].filter(([, v]) => v !== ""));
   const p = schema.safeParse(raw);
-  if (!p.success) return { error: p.error.issues[0].message };
+  if (!p.success) return { error: await localized(p.error.issues[0].message) };
   const d = p.data;
 
   if (d.barcode) {

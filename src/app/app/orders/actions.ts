@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
 import { refundOrder, RefundError } from "@/lib/refunds";
@@ -24,8 +25,8 @@ export async function refundAction(orderId: string, _: RefundFormState, form: Fo
     revalidatePath("/app", "layout");
     return { ok: true };
   } catch (e) {
-    if (e instanceof RefundError) return { error: e.message };
+    if (e instanceof RefundError) return { error: await localized(e.message) };
     console.error(e);
-    return { error: "Could not save the refund. Try again." };
+    return { error: await localized("Could not save the refund. Try again.") };
   }
 }

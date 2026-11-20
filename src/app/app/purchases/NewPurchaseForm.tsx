@@ -66,7 +66,7 @@ export function NewPurchaseForm({ suppliers, products, methods, t, defaultSuppli
                   {products.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
                 </select>
               </label>
-              {lines.length > 1 && <button type="button" className="mt-6 w-10 h-10 font-bold" onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="remove">✕</button>}
+              {lines.length > 1 && <button type="button" className="mt-6 w-10 h-10 font-bold" onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label={t.removeLabel}>✕</button>}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3">
               <label className="field !mb-0"><span>{t.quantity}</span><input className="input" inputMode="decimal" value={l.quantity} onChange={(e) => set(i, { quantity: e.target.value })} name={`qty-${i}`} /></label>
@@ -98,7 +98,7 @@ export function NewPurchaseForm({ suppliers, products, methods, t, defaultSuppli
       )}
 
       <div className="flex items-center justify-between mt-2">
-        <div className="font-extrabold text-lg">{t.total}: <span data-testid="total">{total.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span> ETB</div>
+        <div className="font-extrabold text-lg">{t.total}: <span data-testid="total">{total.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span> {t.etb}</div>
         <button className="btn btn-primary" disabled={pending}>{t.receiveStock}</button>
       </div>
     </form>

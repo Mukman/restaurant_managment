@@ -5,7 +5,7 @@ import { getLang } from "@/lib/lang";
 import { formatETB } from "@/lib/money";
 import { ProductForm } from "./ProductForm";
 
-const KEYS: DictKey[] = ["addProduct", "name", "nameAm", "category", "barcode", "price", "cost", "unit", "openingStock", "minStock", "soldByWeight", "noStockTracking", "save"];
+const KEYS: DictKey[] = ["addProduct", "name", "nameAm", "category", "barcode", "price", "cost", "unit", "openingStock", "minStock", "soldByWeight", "noStockTracking", "save", "unit_PIECE", "unit_KG", "unit_GRAM", "unit_LITER", "unit_BOTTLE", "unit_BOX", "unit_PACK"];
 
 export default async function ProductsPage() {
   const s = await requireSession(["OWNER", "MANAGER", "INVENTORY"]);
@@ -34,7 +34,7 @@ export default async function ProductsPage() {
                   <td className="hidden md:table-cell font-mono text-xs">{p.barcode ?? "—"}</td>
                   <td>{p.cost > 0 ? formatETB(p.cost, lang) : "—"}</td>
                   <td>{formatETB(p.price, lang)}{p.soldByWeight ? t("perKg") : ""}</td>
-                  <td>{p.tracksStock ? <span className={`badge ${cls}`}>{q} {p.unit.toLowerCase()}</span> : "—"}</td>
+                  <td>{p.tracksStock ? <span className={`badge ${cls}`}>{q} {t(`unit_${p.unit}` as DictKey)}</span> : "—"}</td>
                 </tr>
               );
             })}
