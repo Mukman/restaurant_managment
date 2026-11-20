@@ -27,7 +27,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     <div className="p-4 md:p-6 max-w-5xl report">
       <h1 className="text-2xl font-extrabold mb-1">{t("reports")}</h1>
       <p className="text-sm mb-4" style={{ color: "var(--ink-soft)" }}>{range.from} → {range.to}</p>
-      <form className="panel no-print flex flex-wrap gap-3 items-end mb-4" method="get">
+      <form className="panel no-print grid grid-cols-2 sm:flex sm:flex-wrap gap-3 items-end mb-4" method="get">
         <label className="field mb-0"><span>{t("from")}</span><input className="input" type="date" name="from" defaultValue={range.from} /></label>
         <label className="field mb-0"><span>{t("to")}</span><input className="input" type="date" name="to" defaultValue={range.to} /></label>
         <button className="btn btn-primary">{t("show")}</button>

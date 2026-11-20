@@ -47,6 +47,16 @@ body {
 .table td { padding: 10px; border-bottom: 1px solid var(--line); }
 .error-box { background: var(--error-tint); color: var(--error); border-radius: 6px; padding: 10px 12px; font-weight: 600; margin-bottom: 14px; }
 
+html, body { max-width: 100%; overflow-x: hidden; }
+@media (max-width: 767px) {
+  /* 16px stops iPhones zooming in when a field is tapped; bigger targets for fingers */
+  .input { font-size: 16px; padding: 12px; }
+  .btn { min-height: 44px; }
+  .panel { padding: 14px; }
+  .table th { font-size: 10.5px; padding: 8px 6px; }
+  .table td { padding: 10px 6px; font-size: 13px; }
+}
+
 @media print {
   body * { visibility: hidden; }
   .receipt, .receipt * { visibility: visible; }

@@ -18,17 +18,18 @@ export function StaffClient({ rows, roles, t }: { rows: StaffRow[]; roles: strin
         <h1 className="text-xl font-extrabold mb-3">{t.staff}</h1>
         {msg && <div className="error-box">{msg}</div>}
         <table className="table w-full">
-          <thead><tr><th>{t.name}</th><th>{t.role}</th><th>{t.phone}</th><th></th></tr></thead>
+          <thead><tr><th>{t.name}</th><th className="hidden md:table-cell">{t.role}</th><th className="hidden md:table-cell">{t.phone}</th><th></th></tr></thead>
           <tbody>
             {rows.map((u) => (
               <tr key={u.id} style={u.active ? undefined : { opacity: 0.55 }}>
-                <td className="font-bold">{u.name}{u.locked && <span className="badge badge-err ml-2">{t.lockedOut}</span>}</td>
-                <td><span className="badge badge-ok">{t[`role_${u.role}`] ?? u.role}</span></td>
-                <td className="font-mono text-xs">{u.phone}</td>
-                <td className="text-right whitespace-nowrap">
+                <td className="font-bold">{u.name}{u.locked && <span className="badge badge-err ml-2">{t.lockedOut}</span>}
+                  <div className="md:hidden text-xs font-normal" style={{ color: "var(--ink-soft)" }}>{t[`role_${u.role}`] ?? u.role} · <span className="font-mono">{u.phone}</span></div></td>
+                <td className="hidden md:table-cell"><span className="badge badge-ok">{t[`role_${u.role}`] ?? u.role}</span></td>
+                <td className="hidden md:table-cell font-mono text-xs">{u.phone}</td>
+                <td className="text-right">
                   {u.manageable && (
-                    <>
-                      <button className="btn btn-secondary !py-1 !px-2 text-xs mr-1"
+                    <div className="flex flex-col md:flex-row md:justify-end gap-1 items-end">
+                      <button className="btn btn-secondary !py-1 !px-2 text-xs"
                         onClick={() => { const pin = window.prompt(t.newPin); if (pin) start(async () => report(await resetPinAction(u.id, pin))); }}>
                         {t.resetPin}
                       </button>
@@ -36,7 +37,7 @@ export function StaffClient({ rows, roles, t }: { rows: StaffRow[]; roles: strin
                         onClick={() => start(async () => report(await setActiveAction(u.id, !u.active)))}>
                         {u.active ? t.deactivate : t.activate}
                       </button>
-                    </>
+                    </div>
                   )}
                 </td>
               </tr>
