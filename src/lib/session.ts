@@ -16,7 +16,12 @@ export interface SessionData {
 
 function key() {
   const s = process.env.AUTH_SECRET;
-  if (!s || s.length < 32) throw new Error("AUTH_SECRET must be set (32+ chars)");
+  if (!s || s.length < 32) {
+    throw new Error(
+      "AUTH_SECRET is missing or too short. Add a line AUTH_SECRET=\"<64 random characters>\" to your .env file. " +
+        "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    );
+  }
   return new TextEncoder().encode(s);
 }
 

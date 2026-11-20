@@ -1,5 +1,6 @@
-// Integration tests for checkout against a real Postgres (DATABASE_URL).
-// Run: npm test   (uses a throwaway tenant each run)
+import "./_guard";
+// Integration tests for checkout against a real Postgres (TEST_DATABASE_URL).
+// Run: npm test   (needs TEST_DATABASE_URL; each run uses throwaway shops)
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
 import { db } from "../src/lib/db";

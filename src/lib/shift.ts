@@ -1,5 +1,5 @@
 import "server-only";
-import { Prisma } from "@prisma/client";
+import { Prisma, type OrderStatus } from "@prisma/client";
 import { db } from "./db";
 import type { SessionData } from "./session";
 
@@ -28,27 +28,31 @@ export async function openShift(s: SessionData, openingFloat: number) {
 /** What the till should hold, and what was taken by each payment method, for one shift. */
 export async function shiftSummary(shiftId: string) {
   const shift = await db.shift.findUniqueOrThrow({ where: { id: shiftId } });
-  const [byMethod, orders, repaid] = await Promise.all([
-    db.payment.groupBy({
-      by: ["method"],
-      where: { order: { shiftId, status: "COMPLETED" } },
-      _sum: { amount: true },
-    }),
-    db.order.aggregate({ where: { shiftId, status: "COMPLETED" }, _count: true, _sum: { total: true } }),
+  // A fully refunded sale is still money that came in during this shift; the refund is subtracted separately.
+  const taken = { in: ["COMPLETED", "REFUNDED"] as OrderStatus[] };
+  const [byMethod, orders, repaid, refunded] = await Promise.all([
+    db.payment.groupBy({ by: ["method"], where: { order: { shiftId, status: taken } }, _sum: { amount: true } }),
+    db.order.aggregate({ where: { shiftId, status: taken }, _count: true, _sum: { total: true } }),
     // Customers paying back old credit during this shift
     db.creditEntry.groupBy({ by: ["method"], where: { shiftId, type: "REPAYMENT" }, _sum: { amount: true } }),
+    // Refunds paid out during this shift
+    db.refund.groupBy({ by: ["method"], where: { shiftId }, _sum: { amount: true } }),
   ]);
   const methods = Object.fromEntries(byMethod.map((m) => [m.method, m._sum.amount ?? 0])) as Record<string, number>;
   const repayments = Object.fromEntries(repaid.map((m) => [m.method ?? "CASH", m._sum.amount ?? 0])) as Record<string, number>;
+  const refunds = Object.fromEntries(refunded.map((m) => [m.method, m._sum.amount ?? 0])) as Record<string, number>;
   const cashSales = methods.CASH ?? 0;
   const cashRepayments = repayments.CASH ?? 0;
+  const cashRefunds = refunds.CASH ?? 0;
   return {
     shift,
     methods,
     repayments,
+    refunds,
     cashSales,
     cashRepayments,
-    expectedCash: shift.openingFloat + cashSales + cashRepayments,
+    cashRefunds,
+    expectedCash: shift.openingFloat + cashSales + cashRepayments - cashRefunds,
     orderCount: orders._count,
     salesTotal: orders._sum.total ?? 0,
   };

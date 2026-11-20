@@ -1,13 +1,11 @@
 "use client";
-import { useActionState, useEffect, useRef } from "react";
+import { useServerForm } from "@/lib/useServerForm";
 import { createProduct, type ProductFormState } from "./actions";
 
 export function ProductForm({ t, mode }: { t: Record<string, string>; mode: "GROCERY" | "RESTAURANT" }) {
-  const [state, action, pending] = useActionState<ProductFormState, FormData>(createProduct, {});
-  const ref = useRef<HTMLFormElement>(null);
-  useEffect(() => { if (state.ok) ref.current?.reset(); }, [state]);
+  const { state, onSubmit, pending } = useServerForm<ProductFormState>(createProduct, {});
   return (
-    <form ref={ref} action={action} className="panel">
+    <form onSubmit={onSubmit} className="panel">
       <h2 className="font-extrabold mb-4">{t.addProduct}</h2>
       {state.error && <div className="error-box">{state.error}</div>}
       <div className="grid sm:grid-cols-2 gap-x-3">
