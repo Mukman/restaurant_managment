@@ -3,7 +3,7 @@ import { useState, useTransition } from "react";
 import { useServerForm } from "@/lib/useServerForm";
 import { addStaffAction, resetPinAction, setActiveAction, type StaffFormState } from "./actions";
 
-export interface StaffRow { id: string; name: string; phone: string; role: string; active: boolean; manageable: boolean }
+export interface StaffRow { id: string; name: string; phone: string; role: string; active: boolean; locked: boolean; manageable: boolean }
 
 export function StaffClient({ rows, roles, t }: { rows: StaffRow[]; roles: string[]; t: Record<string, string> }) {
   const { state, onSubmit, pending } = useServerForm<StaffFormState>(addStaffAction, {});
@@ -22,7 +22,7 @@ export function StaffClient({ rows, roles, t }: { rows: StaffRow[]; roles: strin
           <tbody>
             {rows.map((u) => (
               <tr key={u.id} style={u.active ? undefined : { opacity: 0.55 }}>
-                <td className="font-bold">{u.name}</td>
+                <td className="font-bold">{u.name}{u.locked && <span className="badge badge-err ml-2">{t.lockedOut}</span>}</td>
                 <td><span className="badge badge-ok">{t[`role_${u.role}`] ?? u.role}</span></td>
                 <td className="font-mono text-xs">{u.phone}</td>
                 <td className="text-right whitespace-nowrap">

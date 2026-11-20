@@ -19,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: "/app/customers", label: t("customers"), roles: ["OWNER", "MANAGER", "CASHIER"] },
     { href: "/app/shift", label: t("shift"), roles: ["OWNER", "MANAGER", "CASHIER", "WAITER"] },
     { href: "/app/products", label: t("products"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
+    { href: "/app/reports", label: t("reports"), roles: ["OWNER", "MANAGER"] },
     { href: "/app/purchases", label: t("purchases"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
     { href: "/app/suppliers", label: t("suppliers"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
     { href: "/app/staff", label: t("staff"), roles: ["OWNER", "MANAGER"] },
@@ -26,7 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen md:grid md:grid-cols-[220px_1fr]">
-      <aside className="text-white p-4 flex md:flex-col gap-2 items-center md:items-stretch md:sticky md:top-0 md:h-screen" style={{ background: "var(--sidebar)" }}>
+      <aside className="no-print text-white p-4 flex md:flex-col gap-2 items-center md:items-stretch md:sticky md:top-0 md:h-screen" style={{ background: "var(--sidebar)" }}>
         <div className="font-extrabold text-base md:mb-4 mr-auto md:mr-0 truncate">{tenant.name}</div>
         <nav className="flex md:flex-col gap-1">
           {nav.map((n) => (
@@ -40,7 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </LogoutForm>
       </aside>
       <div className="min-w-0">
-        <header className="h-14 bg-white border-b flex items-center justify-end px-4 gap-3" style={{ borderColor: "var(--line)" }}>
+        <header className="no-print h-14 bg-white border-b flex items-center justify-end px-4 gap-3" style={{ borderColor: "var(--line)" }}>
           <span className="badge badge-ok">{tenant.mode === "RESTAURANT" ? t("restaurant") : t("grocery")}</span>
           <LangToggle lang={lang} />
         </header>

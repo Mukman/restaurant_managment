@@ -159,6 +159,23 @@ const DICT = {
   retry: { en: "Try again", am: "እንደገና ሞክር" },
   discard: { en: "Discard", am: "አስወግድ" },
   discardWarn: { en: "Discard this sale? It will NOT be recorded.", am: "ይህ ሽያጭ ይወገድ? አይመዘገብም።" },
+  reports: { en: "Reports", am: "ሪፖርቶች" },
+  from: { en: "From", am: "ከ" },
+  to: { en: "To", am: "እስከ" },
+  show: { en: "Show", am: "አሳይ" },
+  exportExcel: { en: "Download Excel", am: "ኤክሴል አውርድ" },
+  printPdf: { en: "Print / Save as PDF", am: "አትም / PDF አስቀምጥ" },
+  grossSales: { en: "Gross sales", am: "ጠቅላላ ሽያጭ" },
+  discounts: { en: "Discounts", am: "ቅናሾች" },
+  refundsTotal: { en: "Refunds", am: "ተመላሾች" },
+  netSalesLabel: { en: "Net sales", am: "የተጣራ ሽያጭ" },
+  vatIncluded: { en: "VAT included", am: "የተካተተ ተ.እ.ታ" },
+  purchasesReceived: { en: "Purchases received", am: "የተቀበልናቸው ግዢዎች" },
+  byDay: { en: "By day", am: "በቀን" },
+  byPayment: { en: "By payment method", am: "በክፍያ መንገድ" },
+  topProducts: { en: "Top products", am: "ብዙ የተሸጡ" },
+  revenue: { en: "Revenue", am: "ገቢ" },
+  lockedOut: { en: "Locked (reset PIN to unlock)", am: "ተቆልፏል (ለመክፈት ፒን ይቀይሩ)" },
 } as const;
 
 export type DictKey = keyof typeof DICT;
