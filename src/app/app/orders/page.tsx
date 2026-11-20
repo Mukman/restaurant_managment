@@ -22,7 +22,7 @@ export default async function OrdersPage() {
       <h1 className="text-2xl font-extrabold mb-4">{t("orders")}</h1>
       <div className="panel overflow-x-auto">
         <table className="table w-full">
-          <thead><tr><th>#</th><th>{t("date")}</th><th>{t("customer")}</th><th>{t("total")}</th><th>{t("refunded")}</th><th>{t("status")}</th></tr></thead>
+          <thead><tr><th>#</th><th>{t("date")}</th><th className="hidden md:table-cell">{t("customer")}</th><th>{t("total")}</th><th>{t("refunded")}</th><th>{t("status")}</th></tr></thead>
           <tbody>
             {orders.map((o) => {
               const refunded = o.refunds.reduce((sum, r) => sum + r.amount, 0);
@@ -30,7 +30,7 @@ export default async function OrdersPage() {
                 <tr key={o.id}>
                   <td><Link href={`/app/orders/${o.id}`} className="font-bold" style={{ color: "var(--primary)" }}>#{o.number}</Link>{o.table && <span className="text-xs ml-1" style={{ color: "var(--ink-faint)" }}>{o.table.label}</span>}</td>
                   <td>{fmt(o.closedAt)}</td>
-                  <td>{o.customer?.name ?? "—"}</td>
+                  <td className="hidden md:table-cell">{o.customer?.name ?? "—"}</td>
                   <td className="font-bold">{formatETB(o.total, lang)}</td>
                   <td>{refunded > 0 ? <span className="badge badge-err">−{formatETB(refunded, lang)}</span> : "—"}</td>
                   <td><span className={`badge ${o.status === "REFUNDED" ? "badge-err" : "badge-ok"}`}>{o.status === "REFUNDED" ? t("fullyRefunded") : t("completed")}</span></td>

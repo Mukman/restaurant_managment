@@ -56,26 +56,25 @@ export function NewPurchaseForm({ suppliers, products, methods, t, defaultSuppli
         <label className="field"><span>{t.invoiceNo}</span><input className="input" value={invoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} name="invoiceNo" /></label>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead><tr><th>{t.product}</th><th>{t.quantity}</th><th>{t.unitCost}</th><th>{t.expiry}</th><th /></tr></thead>
-          <tbody>
-            {lines.map((l, i) => (
-              <tr key={i}>
-                <td>
-                  <select className="input" aria-label={t.product} value={l.productId} onChange={(e) => set(i, { productId: e.target.value })} name={`product-${i}`}>
-                    <option value="">—</option>
-                    {products.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-                  </select>
-                </td>
-                <td><input className="input" style={{ width: 90 }} inputMode="decimal" aria-label={t.quantity} value={l.quantity} onChange={(e) => set(i, { quantity: e.target.value })} name={`qty-${i}`} /></td>
-                <td><input className="input" style={{ width: 110 }} inputMode="decimal" aria-label={t.unitCost} value={l.unitCost} onChange={(e) => set(i, { unitCost: e.target.value })} name={`cost-${i}`} /></td>
-                <td><input className="input" type="date" aria-label={t.expiry} value={l.expiresAt} onChange={(e) => set(i, { expiresAt: e.target.value })} name={`exp-${i}`} /></td>
-                <td>{lines.length > 1 && <button type="button" className="text-sm font-bold" onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="remove">✕</button>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid gap-3 mb-1">
+        {lines.map((l, i) => (
+          <div key={i} className="rounded-lg border p-3" style={{ borderColor: "var(--line)" }}>
+            <div className="flex gap-2 items-start">
+              <label className="field flex-1 !mb-2"><span>{t.product}</span>
+                <select className="input" value={l.productId} onChange={(e) => set(i, { productId: e.target.value })} name={`product-${i}`}>
+                  <option value="">—</option>
+                  {products.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                </select>
+              </label>
+              {lines.length > 1 && <button type="button" className="mt-6 w-10 h-10 font-bold" onClick={() => setLines((ls) => ls.filter((_, j) => j !== i))} aria-label="remove">✕</button>}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3">
+              <label className="field !mb-0"><span>{t.quantity}</span><input className="input" inputMode="decimal" value={l.quantity} onChange={(e) => set(i, { quantity: e.target.value })} name={`qty-${i}`} /></label>
+              <label className="field !mb-0"><span>{t.unitCost}</span><input className="input" inputMode="decimal" value={l.unitCost} onChange={(e) => set(i, { unitCost: e.target.value })} name={`cost-${i}`} /></label>
+              <label className="field !mb-0 col-span-2 sm:col-span-1"><span>{t.expiry}</span><input className="input" type="date" value={l.expiresAt} onChange={(e) => set(i, { expiresAt: e.target.value })} name={`exp-${i}`} /></label>
+            </div>
+          </div>
+        ))}
       </div>
       <button type="button" className="btn mt-2 mb-4" onClick={() => setLines((ls) => [...ls, blank()])}>+ {t.addLine}</button>
 

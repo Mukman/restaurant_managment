@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { LogoutForm } from "@/components/LogoutForm";
+import { AppShell } from "@/components/AppShell";
 import { LangToggle } from "@/components/LangToggle";
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -26,27 +25,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ].filter((n) => n.roles.includes(s.role));
 
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[220px_1fr]">
-      <aside className="no-print text-white p-4 flex md:flex-col gap-2 items-center md:items-stretch md:sticky md:top-0 md:h-screen" style={{ background: "var(--sidebar)" }}>
-        <div className="font-extrabold text-base md:mb-4 mr-auto md:mr-0 truncate">{tenant.name}</div>
-        <nav className="flex md:flex-col gap-1">
-          {nav.map((n) => (
-            <Link key={n.href} href={n.href} className="px-3 py-2 rounded-lg font-semibold hover:bg-white/10">{n.label}</Link>
-          ))}
-        </nav>
-        <LogoutForm action={logout} className="md:mt-auto">
-          <div className="hidden md:block text-sm font-bold">{s.name}</div>
-          <div className="hidden md:block text-xs mb-2" style={{ color: "#8fa396" }}>{s.role}</div>
-          <button className="text-sm font-semibold opacity-80 hover:opacity-100">{t("signOut")}</button>
-        </LogoutForm>
-      </aside>
-      <div className="min-w-0">
-        <header className="no-print h-14 bg-white border-b flex items-center justify-end px-4 gap-3" style={{ borderColor: "var(--line)" }}>
-          <span className="badge badge-ok">{tenant.mode === "RESTAURANT" ? t("restaurant") : t("grocery")}</span>
-          <LangToggle lang={lang} />
-        </header>
-        <main>{children}</main>
-      </div>
-    </div>
+    <AppShell
+      tenantName={tenant.name}
+      userName={s.name}
+      role={s.role}
+      nav={nav.map(({ href, label }) => ({ href, label }))}
+      signOutLabel={t("signOut")}
+      menuLabel="Menu"
+      logout={logout}
+      badge={<span className="badge badge-ok">{tenant.mode === "RESTAURANT" ? t("restaurant") : t("grocery")}</span>}
+      langToggle={<LangToggle lang={lang} />}
+    >
+      {children}
+    </AppShell>
   );
 }

@@ -23,12 +23,12 @@ export default async function CustomersPage() {
           <div className="text-sm font-bold">{t("totalOwed")}: <span style={{ color: "var(--error)" }}>{formatETB(totalOwed, lang)}</span></div>
         </div>
         <table className="table w-full">
-          <thead><tr><th>{t("name")}</th><th>{t("phone")}</th><th>{t("owes")}</th><th>{t("creditLimit")}</th><th>{t("available")}</th></tr></thead>
+          <thead><tr><th>{t("name")}</th><th className="hidden md:table-cell">{t("phone")}</th><th>{t("owes")}</th><th>{t("creditLimit")}</th><th>{t("available")}</th></tr></thead>
           <tbody>
             {customers.map((c) => (
               <tr key={c.id}>
                 <td><Link href={`/app/customers/${c.id}`} className="font-bold" style={{ color: "var(--primary)" }}>{c.name}</Link></td>
-                <td className="font-mono text-xs">{c.phone ?? "—"}</td>
+                <td className="hidden md:table-cell font-mono text-xs">{c.phone ?? "—"}</td>
                 <td>{c.creditBalance > 0 ? <span className="badge badge-warn">{formatETB(c.creditBalance, lang)}</span> : "—"}</td>
                 <td>{formatETB(c.creditLimit, lang)}</td>
                 <td>{formatETB(Math.max(0, c.creditLimit - c.creditBalance), lang)}</td>
