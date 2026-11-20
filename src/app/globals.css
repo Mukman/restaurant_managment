@@ -50,5 +50,8 @@ body {
 @media print {
   body * { visibility: hidden; }
   .receipt, .receipt * { visibility: visible; }
+  .report, .report * { visibility: visible; }
+  .report { position: absolute; left: 0; top: 0; width: 100%; }
+  .no-print { display: none !important; }
   .receipt { position: absolute; left: 0; top: 0; width: 72mm; font-size: 12px; }
 }

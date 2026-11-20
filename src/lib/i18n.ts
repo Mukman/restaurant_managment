@@ -150,6 +150,22 @@ const DICT = {
   margin: { en: "Margin", am: "ትርፍ" },
   balanceDue: { en: "Balance due", am: "ቀሪ ዕዳ" },
   supplierPaidFromTill: { en: "Supplier payments from till", am: "ከሳጥን ለአቅራቢ የተከፈለ" },
+  reports: { en: "Reports", am: "ሪፖርቶች" },
+  from: { en: "From", am: "ከ" },
+  to: { en: "To", am: "እስከ" },
+  show: { en: "Show", am: "አሳይ" },
+  exportExcel: { en: "Download Excel", am: "ኤክሴል አውርድ" },
+  printPdf: { en: "Print / Save as PDF", am: "አትም / PDF አስቀምጥ" },
+  grossSales: { en: "Gross sales", am: "ጠቅላላ ሽያጭ" },
+  discounts: { en: "Discounts", am: "ቅናሾች" },
+  refundsTotal: { en: "Refunds", am: "ተመላሾች" },
+  netSalesLabel: { en: "Net sales", am: "የተጣራ ሽያጭ" },
+  vatIncluded: { en: "VAT included", am: "የተካተተ ተ.እ.ታ" },
+  purchasesReceived: { en: "Purchases received", am: "የተቀበልናቸው ግዢዎች" },
+  byDay: { en: "By day", am: "በቀን" },
+  byPayment: { en: "By payment method", am: "በክፍያ መንገድ" },
+  topProducts: { en: "Top products", am: "ብዙ የተሸጡ" },
+  revenue: { en: "Revenue", am: "ገቢ" },
 } as const;
 
 export type DictKey = keyof typeof DICT;
