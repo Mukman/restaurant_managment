@@ -25,10 +25,21 @@ Both modes share products, stock, payments, shifts and reports.
 ## Getting started
 
 ```bash
-cp .env.example .env   # set DATABASE_URL
+cp .env.example .env   # set DATABASE_URL and AUTH_SECRET
 npm install
-npx prisma migrate dev
-npm run dev
+npx prisma migrate deploy   # creates the tables
+npm run dev                 # open http://localhost:3000/signup
+npm test                    # checkout tests (needs a Postgres in DATABASE_URL; use a throwaway DB)
+```
+
+## What works now
+
+- `/signup`: create a shop (grocery or restaurant), owner signs in with phone + PIN
+- `/app/products`: add products with Amharic name, barcode, unit, sold-by-weight, opening and minimum stock
+- `/app/pos`: barcode/search, categories, weighed items, discount, VAT, payment (Cash with change,
+  Telebirr / CBE Birr / M-Pesa / bank with reference, card, credit to a customer), printable receipt.
+  Restaurant mode adds tables, waiters, open orders, add items, pay later.
+- `/app`: today's sales, order count, low stock
 ```
 
 ## Roadmap
