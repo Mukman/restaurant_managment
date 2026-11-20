@@ -124,6 +124,9 @@ $env:TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/addis_test
   Retrying a submit never receives the same delivery twice.
 - `/app/suppliers`: what you owe each supplier, purchase and payment history, and **pay supplier** (oldest unpaid
   purchase first, or a chosen one). Cash paid out of the till lowers that shift's expected cash. Only owner/manager can pay.
+- `/app/reports`: owner/manager pick a date range (days run 00:00–24:00 Ethiopian time, UTC+3) and see gross sales,
+  discounts, refunds, net, VAT included, purchases received, sales by day and payment method, and top products.
+  **Download Excel** gives the same numbers as a spreadsheet; **Print / Save as PDF** uses the browser's print dialog.
 - `/app`: today's sales (after refunds), order count, low stock, credit owed, owed to suppliers, stock value at cost
 
 ## Roadmap
