@@ -96,6 +96,22 @@ const DICT = {
   flagDispute: { en: "Flag dispute", am: "አለመግባባት ምልክት አድርግ" },
   noShift: { en: "No open shift", am: "ክፍት ፈረቃ የለም" },
   orders: { en: "Orders", am: "ትዕዛዞች" },
+  customers: { en: "Customers", am: "ደንበኞች" },
+  addCustomer: { en: "Add customer", am: "ደንበኛ ጨምር" },
+  creditLimit: { en: "Credit limit (ETB)", am: "የዱቤ ገደብ (ብር)" },
+  limitByManager: { en: "A manager or the owner sets the credit limit. New customers start at 0 (cash only).", am: "የዱቤ ገደብ የሚወስነው ስራ አስኪያጅ ወይም ባለቤት ነው። አዲስ ደንበኛ በ0 (በጥሬ ገንዘብ ብቻ) ይጀምራል።" },
+  owes: { en: "Owes", am: "ያለበት ዕዳ" },
+  available: { en: "Available", am: "ቀሪ ዱቤ" },
+  totalOwed: { en: "Total owed to you", am: "ጠቅላላ የሚከፈልዎ" },
+  recordRepayment: { en: "Record repayment", am: "ክፍያ መዝግብ" },
+  amountPaid: { en: "Amount paid (ETB)", am: "የተከፈለ መጠን (ብር)" },
+  history: { en: "History", am: "ታሪክ" },
+  date: { en: "Date", am: "ቀን" },
+  amount: { en: "Amount", am: "መጠን" },
+  creditSale: { en: "Credit sale", am: "የዱቤ ሽያጭ" },
+  repayment: { en: "Repayment", am: "ክፍያ" },
+  creditOwed: { en: "Credit owed", am: "የዱቤ ዕዳ" },
+  cashRepayments: { en: "Cash repayments (credit)", am: "የዱቤ ክፍያ (ጥሬ ገንዘብ)" },
 } as const;
 
 export type DictKey = keyof typeof DICT;

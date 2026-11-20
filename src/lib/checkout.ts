@@ -111,7 +111,15 @@ async function takePayments(tx: Tx, s: SessionData, order: { id: string; total: 
       if (!c) throw new CheckoutError("Customer not found");
       if (c.creditBalance + p.amount > c.creditLimit)
         throw new CheckoutError(`${c.name} would go over their credit limit`);
-      await tx.customer.update({ where: { id: c.id }, data: { creditBalance: { increment: p.amount } } });
+      // Conditional increment so two tills can't both push the customer past their limit.
+      const upd = await tx.customer.updateMany({
+        where: { id: c.id, creditBalance: { lte: c.creditLimit - p.amount } },
+        data: { creditBalance: { increment: p.amount } },
+      });
+      if (upd.count === 0) throw new CheckoutError(`${c.name} would go over their credit limit`);
+      await tx.creditEntry.create({
+        data: { tenantId: s.tenantId, customerId: c.id, type: "SALE", amount: p.amount, orderId: order.id, userId: s.userId },
+      });
     }
     await tx.payment.create({
       data: { orderId: order.id, method: p.method, amount: p.amount, tendered: p.tendered, reference: p.reference },

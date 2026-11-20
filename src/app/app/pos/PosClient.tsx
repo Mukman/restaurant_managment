@@ -396,6 +396,7 @@ function PaymentModal(props: {
             <option value="">—</option>
             {props.customers.map((c) => <option key={c.id} value={c.id}>{c.name} ({formatETB(c.available, lang)})</option>)}
           </select>
+          {props.customers.length === 0 && <Link href="/app/customers" className="text-sm font-bold" style={{ color: "var(--primary)" }}>{t("addCustomer")} →</Link>}
         </label>
       )}
       {props.error && <div className="error-box">{props.error}</div>}

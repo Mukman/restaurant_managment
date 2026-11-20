@@ -13,7 +13,7 @@ export default async function Dashboard() {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
 
-  const [sales, open, stock] = await Promise.all([
+  const [sales, open, stock, owed] = await Promise.all([
     db.order.aggregate({
       where: { tenantId: s.tenantId, branchId: s.branchId, status: "COMPLETED", closedAt: { gte: start } },
       _sum: { total: true },
@@ -24,6 +24,7 @@ export default async function Dashboard() {
       where: { branchId: s.branchId, product: { tenantId: s.tenantId, active: true, tracksStock: true } },
       include: { product: true },
     }),
+    db.customer.aggregate({ where: { tenantId: s.tenantId }, _sum: { creditBalance: true } }),
   ]);
   const low = stock.filter((x) => Number(x.quantity) <= Number(x.product.minStock));
 
@@ -32,12 +33,13 @@ export default async function Dashboard() {
     [t("todayOrders"), String(sales._count)],
     ...(s.mode === "RESTAURANT" ? [[t("openOrders"), String(open)]] : []),
     [t("lowStock"), String(low.length)],
+    [t("creditOwed"), formatETB(owed._sum.creditBalance ?? 0, lang)],
   ];
 
   return (
     <div className="p-4 md:p-6 max-w-5xl">
       <h1 className="text-2xl font-extrabold mb-4">{t("dashboard")}</h1>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-6">
         {kpis.map(([label, value]) => (
           <div key={label} className="panel">
             <div className="text-xs font-bold mb-2" style={{ color: "var(--ink-soft)" }}>{label}</div>
