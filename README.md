@@ -6,7 +6,7 @@ Each shop picks a **business mode** at signup:
 - **Grocery**: barcode scanning, items sold by weight (kg), pay at the counter.
 - **Restaurant**: tables, waiters, open orders that are paid later.
 
-Both modes share products, stock, payments, shifts, credit and refunds.
+Both modes share products, stock, payments, shifts, credit, refunds, suppliers and purchases.
 
 ## Stack
 
@@ -119,7 +119,12 @@ $env:TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/addis_test
   back in stock (or not, for spoiled goods), is paid back by cash or the way the customer paid (Telebirr, CBE Birr,
   M-Pesa, bank need a reference), and a refunded credit sale lowers what the customer owes. Cash refunds come out of
   the refunding person's shift.
-- `/app`: today's sales (after refunds), order count, low stock, credit owed
+- `/app/purchases`: **receive stock** from a supplier (quantity, unit cost, optional expiry, optional payment now). It adds
+  stock, sets the product cost to the weighted average of old and new stock, and raises what you owe the supplier.
+  Retrying a submit never receives the same delivery twice.
+- `/app/suppliers`: what you owe each supplier, purchase and payment history, and **pay supplier** (oldest unpaid
+  purchase first, or a chosen one). Cash paid out of the till lowers that shift's expected cash. Only owner/manager can pay.
+- `/app`: today's sales (after refunds), order count, low stock, credit owed, owed to suppliers, stock value at cost
 
 ## Roadmap
 

@@ -22,7 +22,7 @@ export default async function ProductsPage() {
       <div className="panel overflow-x-auto">
         <h1 className="text-xl font-extrabold mb-3">{t("products")} ({products.length})</h1>
         <table className="table w-full">
-          <thead><tr><th>{t("name")}</th><th>{t("category")}</th><th>{t("barcode")}</th><th>{t("price")}</th><th>{t("stock")}</th></tr></thead>
+          <thead><tr><th>{t("name")}</th><th>{t("category")}</th><th>{t("barcode")}</th><th>{t("cost")}</th><th>{t("price")}</th><th>{t("stock")}</th></tr></thead>
           <tbody>
             {products.map((p) => {
               const q = Number(p.stock[0]?.quantity ?? 0);
@@ -32,6 +32,7 @@ export default async function ProductsPage() {
                   <td><div className="font-bold">{p.name}</div>{p.nameAm && <div className="text-xs" style={{ color: "var(--ink-faint)" }}>{p.nameAm}</div>}</td>
                   <td>{p.category?.name ?? "—"}</td>
                   <td className="font-mono text-xs">{p.barcode ?? "—"}</td>
+                  <td>{p.cost > 0 ? formatETB(p.cost, lang) : "—"}</td>
                   <td>{formatETB(p.price, lang)}{p.soldByWeight ? t("perKg") : ""}</td>
                   <td>{p.tracksStock ? <span className={`badge ${cls}`}>{q} {p.unit.toLowerCase()}</span> : "—"}</td>
                 </tr>
