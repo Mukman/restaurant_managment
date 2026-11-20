@@ -62,6 +62,11 @@ enum MovementType {
   TRANSFER_OUT
 }
 
+enum CreditEntryType {
+  SALE // customer took goods on credit (owes more)
+  REPAYMENT // customer paid some of it back (owes less)
+}
+
 enum ShiftStatus {
   OPEN
   CLOSED
@@ -203,14 +208,15 @@ model Supplier {
 }
 
 model Customer {
-  id            String  @id @default(cuid())
+  id            String        @id @default(cuid())
   tenantId      String
-  tenant        Tenant  @relation(fields: [tenantId], references: [id])
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
   name          String
   phone         String?
-  creditLimit   Int     @default(0)
-  creditBalance Int     @default(0) // santim owed (ዱቤ)
+  creditLimit   Int           @default(0)
+  creditBalance Int           @default(0) // santim owed (ዱቤ)
   orders        Order[]
+  creditEntries CreditEntry[]
 
   @@index([tenantId])
 }
@@ -310,4 +316,23 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   @@index([tenantId, createdAt])
+}
+
+// Every change to a customer's credit balance. creditBalance on Customer is the running total of these.
+model CreditEntry {
+  id         String          @id @default(cuid())
+  tenantId   String
+  customerId String
+  customer   Customer        @relation(fields: [customerId], references: [id])
+  type       CreditEntryType
+  amount     Int // santim, always positive; type says which way it moves the balance
+  method     PaymentMethod? // how a repayment was made
+  reference  String? // Telebirr / bank transaction id for repayments
+  orderId    String? // the credit sale
+  shiftId    String? // the shift that took a repayment (cash repayments count in the till)
+  userId     String
+  createdAt  DateTime        @default(now())
+
+  @@index([tenantId, customerId, createdAt])
+  @@index([shiftId])
 }

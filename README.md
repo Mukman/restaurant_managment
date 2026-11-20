@@ -41,7 +41,8 @@ npm test                    # checkout tests (needs a Postgres in DATABASE_URL; 
   Restaurant mode adds tables, waiters, open orders, add items, pay later.
 - `/app/shift`: open a shift with the cash in the till, close it with a cash count; expected cash = opening cash + cash sales (mobile money and card are not cash). Owner/manager marks closed shifts audited or disputed. Taking payment requires an open shift.
 - `/app/staff`: owner/manager adds cashiers, waiters and inventory staff (owner can also add managers), resets PINs, deactivates people
-- `/app`: today's sales, order count, low stock
+- `/app/customers`: customer list with balances owed, credit limits (set by owner/manager; a cashier's new customers start at 0), customer page with full credit history, and repayments (cash repayments count in the till for the shift that took them)
+- `/app`: today's sales, order count, low stock, credit owed
 ```
 
 ## Roadmap

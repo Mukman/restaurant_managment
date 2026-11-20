@@ -38,6 +38,7 @@ export default async function ShiftPage() {
               {Object.entries(summary.methods).map(([m, v]) => (
                 <Row key={m} l={PAYMENT_LABELS[m]?.[lang] ?? m} v={formatETB(v, lang)} />
               ))}
+              {summary.cashRepayments > 0 && <Row l={t("cashRepayments")} v={formatETB(summary.cashRepayments, lang)} />}
               <div className="border-t border-dashed pt-2 mt-2" style={{ borderColor: "var(--line)" }}>
                 <Row l={t("expectedCash")} v={formatETB(summary.expectedCash, lang)} bold />
               </div>
