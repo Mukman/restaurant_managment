@@ -39,6 +39,7 @@ export default async function ShiftPage() {
                 <Row key={m} l={PAYMENT_LABELS[m]?.[lang] ?? m} v={formatETB(v, lang)} />
               ))}
               {summary.cashRefunds > 0 && <Row l={t("cashRefunds")} v={`−${formatETB(summary.cashRefunds, lang)}`} />}
+              {summary.cashSupplierPayments > 0 && <Row l={t("supplierPaidFromTill")} v={`−${formatETB(summary.cashSupplierPayments, lang)}`} />}
               {summary.cashRepayments > 0 && <Row l={t("cashRepayments")} v={formatETB(summary.cashRepayments, lang)} />}
               <div className="border-t border-dashed pt-2 mt-2" style={{ borderColor: "var(--line)" }}>
                 <Row l={t("expectedCash")} v={formatETB(summary.expectedCash, lang)} bold />

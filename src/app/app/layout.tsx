@@ -18,6 +18,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: "/app/customers", label: t("customers"), roles: ["OWNER", "MANAGER", "CASHIER"] },
     { href: "/app/shift", label: t("shift"), roles: ["OWNER", "MANAGER", "CASHIER", "WAITER"] },
     { href: "/app/products", label: t("products"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
+    { href: "/app/purchases", label: t("purchases"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
+    { href: "/app/suppliers", label: t("suppliers"), roles: ["OWNER", "MANAGER", "INVENTORY"] },
     { href: "/app/staff", label: t("staff"), roles: ["OWNER", "MANAGER"] },
   ].filter((n) => n.roles.includes(s.role));
 
