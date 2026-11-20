@@ -56,6 +56,7 @@ export default async function PosPage() {
       hasShift={!!shift}
       shop={{ name: tenant.name, tin: tenant.tin }}
       cashier={s.name}
+      userId={s.userId}
       products={posProducts}
       customers={customers.map((c) => ({ id: c.id, name: c.name, available: c.creditLimit - c.creditBalance }))}
       tables={tables.map((x) => ({ id: x.id, label: x.label }))}

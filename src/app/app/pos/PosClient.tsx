@@ -1,9 +1,10 @@
 "use client";
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PAYMENT_LABELS, translator, type Lang } from "@/lib/i18n";
 import { cartTotals, formatETB, toSantim } from "@/lib/money";
+import { loadQueue, saveQueue, type QueuedSale } from "@/lib/offlineQueue";
 import { checkoutAction, type CheckoutResult } from "./actions";
 
 export interface PosProduct {
@@ -36,6 +37,7 @@ interface Props {
   hasShift: boolean;
   shop: { name: string; tin: string | null };
   cashier: string;
+  userId: string;
   products: PosProduct[];
   customers: { id: string; name: string; available: number }[];
   tables: { id: string; label: string }[];
@@ -62,10 +64,62 @@ export function PosClient(props: Props) {
   const [weighing, setWeighing] = useState<PosProduct | null>(null);
   const [weight, setWeight] = useState("");
   const [paying, setPaying] = useState<{ orderId?: string; total: number } | null>(null);
-  const [receipt, setReceipt] = useState<{ result: Extract<CheckoutResult, { ok: true }>; lines: { name: string; qty: number; total: number }[]; method: Method; tendered?: number } | null>(null);
+  const [receipt, setReceipt] = useState<{ result: { number: number | null; total: number; vat: number; subtotal: number; discount: number }; lines: { name: string; qty: number; total: number }[]; method: Method; tendered?: number; offline?: boolean } | null>(null);
+  const [online, setOnline] = useState(true);
+  const [queue, setQueue] = useState<QueuedSale[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const clientIdRef = useRef(newClientId()); // stays the same across retries of one sale
+
+  const mine = useCallback(() => loadQueue().filter((q) => q.userId === props.userId), [props.userId]);
+  const syncing = useRef(false);
+
+  /** Sends waiting sales one at a time, oldest first. A lost connection just stops and leaves the rest queued. */
+  const sync = useCallback(async () => {
+    if (syncing.current) return;
+    syncing.current = true;
+    try {
+      for (const q of mine().filter((x) => x.status === "queued")) {
+        let r: CheckoutResult;
+        try { r = await checkoutAction(q.payload); } catch { break; }
+        const rest = loadQueue();
+        saveQueue(r.ok ? rest.filter((x) => x.clientId !== q.clientId) : rest.map((x) => (x.clientId === q.clientId ? { ...x, status: "failed" as const, error: r.error } : x)));
+        setQueue(mine());
+      }
+      router.refresh();
+    } finally {
+      syncing.current = false;
+    }
+  }, [mine, router]);
+
+  useEffect(() => {
+    setOnline(navigator.onLine);
+    setQueue(mine());
+    const up = () => { setOnline(true); void sync(); };
+    const down = () => setOnline(false);
+    window.addEventListener("online", up);
+    window.addEventListener("offline", down);
+    if (navigator.onLine) void sync();
+    // Keep a copy of this page so the POS can be reopened with no internet.
+    if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then(() => navigator.serviceWorker.ready).then((r) => r.active?.postMessage({ type: "cache-pos" })).catch(() => {});
+    }
+    const timer = setInterval(() => { if (navigator.onLine && mine().some((x) => x.status === "queued")) void sync(); }, 30_000);
+    return () => { window.removeEventListener("online", up); window.removeEventListener("offline", down); clearInterval(timer); };
+  }, [mine, sync]);
+
+  function queueSale(payload: Record<string, unknown>, lines: { name: string; qty: number; total: number }[], method: Method, tendered?: number): boolean {
+    const entry: QueuedSale = {
+      clientId: String(payload.clientId), userId: props.userId, createdAt: Date.now(), payload, status: "queued",
+      receipt: { lines, method, tendered, total: totals.total, vat: totals.vat, subtotal: totals.subtotal, discount: totals.discount },
+    };
+    if (!saveQueue([...loadQueue(), entry])) { setError("Could not save the sale on this device. Free some space or reconnect."); return false; }
+    setQueue(mine());
+    setPaying(null);
+    setReceipt({ result: { number: null, total: entry.receipt.total, vat: entry.receipt.vat, subtotal: entry.receipt.subtotal, discount: entry.receipt.discount }, lines, method, tendered, offline: true });
+    reset();
+    return true;
+  }
 
   const label = (p: { name: string; nameAm: string | null }) => (lang === "am" && p.nameAm ? p.nameAm : p.name);
   const categories = useMemo(() => [...new Set(products.map((p) => p.category).filter(Boolean))] as string[], [products]);
@@ -113,7 +167,8 @@ export function PosClient(props: Props) {
   function submit(payload: Record<string, unknown>, after: (r: Extract<CheckoutResult, { ok: true }>) => void) {
     setError(null);
     startTransition(async () => {
-      const r = await checkoutAction({ clientId: clientIdRef.current, ...payload });
+      let r: CheckoutResult;
+      try { r = await checkoutAction({ clientId: clientIdRef.current, ...payload }); } catch { setError(t("needsInternet")); return; }
       if (!r.ok) { setError(r.error); return; }
       after(r);
       router.refresh();
@@ -133,6 +188,21 @@ export function PosClient(props: Props) {
     <div className="grid lg:grid-cols-[1fr_360px] lg:h-[calc(100vh-56px)]">
       {/* Products */}
       <section className="p-4 lg:overflow-y-auto">
+        {!online && <div className="mb-3 rounded-lg px-4 py-3 font-bold badge-warn" role="status">{t("offlineBanner")}</div>}
+        {queue.some((q) => q.status === "queued") && (
+          <div className="mb-3 rounded-lg px-4 py-3 font-bold badge-warn flex items-center justify-between gap-3" role="status">
+            <span>{queue.filter((q) => q.status === "queued").length} {t("waitingSync")}</span>
+            {online && <button className="btn btn-secondary !py-1 !px-3 text-sm" onClick={() => void sync()}>{t("syncNow")}</button>}
+          </div>
+        )}
+        {queue.filter((q) => q.status === "failed").map((q) => (
+          <div key={q.clientId} className="mb-3 rounded-lg px-4 py-3 badge-err text-sm" role="alert">
+            <div className="font-bold">{t("syncFailed")}: {formatETB(q.receipt.total, lang)} · {new Date(q.createdAt).toLocaleTimeString("en-GB")}</div>
+            <div className="mb-2">{q.error}</div>
+            <button className="btn btn-secondary !py-1 !px-3 text-sm mr-2" onClick={() => { saveQueue(loadQueue().map((x) => (x.clientId === q.clientId ? { ...x, status: "queued" as const, error: undefined } : x))); setQueue(mine()); void sync(); }}>{t("retry")}</button>
+            <button className="btn btn-secondary !py-1 !px-3 text-sm" onClick={() => { if (window.confirm(t("discardWarn"))) { saveQueue(loadQueue().filter((x) => x.clientId !== q.clientId)); setQueue(mine()); } }}>{t("discard")}</button>
+          </div>
+        ))}
         {!props.hasShift && (
           <Link href="/app/shift" className="block mb-3 rounded-lg px-4 py-3 font-bold badge-warn">{t("openFirst")} →</Link>
         )}
@@ -282,8 +352,7 @@ export function PosClient(props: Props) {
             const lines = paying.orderId
               ? props.openOrders.find((o) => o.id === paying.orderId)!.items.map((i) => ({ name: i.name, qty: i.quantity, total: i.lineTotal }))
               : cart.map((l) => ({ name: label(l.product), qty: l.quantity, total: Math.round(l.product.price * l.quantity) }));
-            submit(
-              {
+            const full = {
                 action: "pay",
                 orderId: paying.orderId,
                 items: paying.orderId ? [] : items,
@@ -292,9 +361,23 @@ export function PosClient(props: Props) {
                 waiterId: waiterId || undefined,
                 customerId,
                 payments: [{ method, amount: paying.total, tendered, reference }],
-              },
-              (r) => { setPaying(null); setReceipt({ result: r, lines, method, tendered }); reset(); },
-            );
+              };
+            // Cash and mobile-money sales of a new cart can wait offline; credit and open tables need the server.
+            const canQueue = !paying.orderId && method !== "CREDIT" && props.hasShift;
+            if (!navigator.onLine) {
+              if (canQueue) queueSale({ clientId: clientIdRef.current, ...full }, lines, method, tendered);
+              else setError(t("needsInternet"));
+              return;
+            }
+            setError(null);
+            startTransition(async () => {
+              let r: CheckoutResult;
+              try { r = await checkoutAction({ clientId: clientIdRef.current, ...full }); }
+              catch { if (canQueue) queueSale({ clientId: clientIdRef.current, ...full }, lines, method, tendered); else setError(t("needsInternet")); return; }
+              if (!r.ok) { setError(r.error); return; }
+              setPaying(null); setReceipt({ result: r, lines, method, tendered }); reset();
+              router.refresh();
+            });
           }}
         />
       )}
@@ -304,7 +387,7 @@ export function PosClient(props: Props) {
           <div className="receipt font-mono text-xs border rounded p-3 mb-4" style={{ borderColor: "var(--line)" }}>
             <div className="text-center font-bold text-sm">{props.shop.name}</div>
             {props.shop.tin && <div className="text-center">TIN: {props.shop.tin}</div>}
-            <div className="text-center mb-2">#{receipt.result.number} · {new Date().toLocaleString("en-GB")}</div>
+            <div className="text-center mb-2">{receipt.offline ? t("offlineSale") : `#${receipt.result.number}`} · {new Date().toLocaleString("en-GB")}</div>
             <div className="mb-2">{props.cashier}</div>
             {receipt.lines.map((l, i) => (
               <div key={i} className="flex justify-between gap-2"><span>{l.qty} × {l.name}</span><span>{(l.total / 100).toFixed(2)}</span></div>

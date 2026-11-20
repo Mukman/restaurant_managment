@@ -109,6 +109,11 @@ $env:TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/addis_test
 - `/app/pos`: barcode/search, categories, weighed items, discount, VAT, payment (Cash with change,
   Telebirr / CBE Birr / M-Pesa / bank with reference, card, credit to a customer), printable receipt.
   Restaurant mode adds tables, waiters, open orders, add items, pay later.
+  **Offline:** after the POS has been opened once online, it can be reloaded with no internet (a service worker keeps the
+  page and its files; production build only). Cash and mobile-money sales of a new cart are saved in the browser and sent
+  automatically when the connection returns (or with "Send now"); each has its own id, so a sale can never be recorded twice.
+  Credit sales and restaurant table orders need the internet. A sale the server refuses on sync (for example, no stock left)
+  stays on screen with Try again / Discard. Logging out clears the stored page.
 - `/app/shift`: open a shift with the cash in the till, close it with a cash count. Expected cash = opening cash
   + cash sales + cash repayments − cash refunds (mobile money and card are not cash). Owner/manager marks closed
   shifts audited or disputed. Taking payment requires an open shift.
