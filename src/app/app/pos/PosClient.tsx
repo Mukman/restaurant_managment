@@ -113,7 +113,7 @@ export function PosClient(props: Props) {
       clientId: String(payload.clientId), userId: props.userId, createdAt: Date.now(), payload, status: "queued",
       receipt: { lines, method, tendered, total: totals.total, vat: totals.vat, subtotal: totals.subtotal, discount: totals.discount },
     };
-    if (!saveQueue([...loadQueue(), entry])) { setError("Could not save the sale on this device. Free some space or reconnect."); return false; }
+    if (!saveQueue([...loadQueue(), entry])) { setError(t("saveOfflineFailed")); return false; }
     setQueue(mine());
     setPaying(null);
     setReceipt({ result: { number: null, total: entry.receipt.total, vat: entry.receipt.vat, subtotal: entry.receipt.subtotal, discount: entry.receipt.discount }, lines, method, tendered, offline: true });
@@ -300,7 +300,7 @@ export function PosClient(props: Props) {
                 </div>
               )}
               <div className="w-20 text-right font-bold text-sm">{formatETB(Math.round(l.product.price * l.quantity), lang)}</div>
-              <button className="px-1" style={{ color: "var(--ink-faint)" }} onClick={() => setQty(l.product.id, 0)} aria-label="remove">✕</button>
+              <button className="px-1" style={{ color: "var(--ink-faint)" }} onClick={() => setQty(l.product.id, 0)} aria-label={t("removeLabel")}>✕</button>
             </div>
           ))}
         </div>
@@ -329,7 +329,7 @@ export function PosClient(props: Props) {
       </aside>
 
       {weighing && (
-        <Modal onClose={() => setWeighing(null)} title={label(weighing)}>
+        <Modal closeLabel={t("closeLabel")} onClose={() => setWeighing(null)} title={label(weighing)}>
           <label className="field"><span>{t("weightKg")}</span>
             <input autoFocus className="input text-center text-xl font-extrabold" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") document.getElementById("weigh-ok")?.click(); }} />
@@ -383,10 +383,10 @@ export function PosClient(props: Props) {
       )}
 
       {receipt && (
-        <Modal onClose={() => setReceipt(null)} title={t("saleDone")}>
+        <Modal closeLabel={t("closeLabel")} onClose={() => setReceipt(null)} title={t("saleDone")}>
           <div className="receipt font-mono text-xs border rounded p-3 mb-4" style={{ borderColor: "var(--line)" }}>
             <div className="text-center font-bold text-sm">{props.shop.name}</div>
-            {props.shop.tin && <div className="text-center">TIN: {props.shop.tin}</div>}
+            {props.shop.tin && <div className="text-center">{t("tinLabel")}: {props.shop.tin}</div>}
             <div className="text-center mb-2">{receipt.offline ? t("offlineSale") : `#${receipt.result.number}`} · {new Date().toLocaleString("en-GB")}</div>
             <div className="mb-2">{props.cashier}</div>
             {receipt.lines.map((l, i) => (
@@ -394,8 +394,8 @@ export function PosClient(props: Props) {
             ))}
             <div className="border-t border-dashed mt-2 pt-2">
               {receipt.result.discount > 0 && <div className="flex justify-between"><span>{t("discount")}</span><span>-{(receipt.result.discount / 100).toFixed(2)}</span></div>}
-              <div className="flex justify-between"><span>VAT 15%</span><span>{(receipt.result.vat / 100).toFixed(2)}</span></div>
-              <div className="flex justify-between font-bold text-sm"><span>{t("total")}</span><span>{(receipt.result.total / 100).toFixed(2)} ETB</span></div>
+              <div className="flex justify-between"><span>{t("vatLabel")} 15%</span><span>{(receipt.result.vat / 100).toFixed(2)}</span></div>
+              <div className="flex justify-between font-bold text-sm"><span>{t("total")}</span><span>{(receipt.result.total / 100).toFixed(2)} {t("etb")}</span></div>
               <div className="flex justify-between"><span>{PAYMENT_LABELS[receipt.method][lang]}</span><span>{((receipt.tendered ?? receipt.result.total) / 100).toFixed(2)}</span></div>
               {receipt.tendered && <div className="flex justify-between"><span>{t("change")}</span><span>{((receipt.tendered - receipt.result.total) / 100).toFixed(2)}</span></div>}
             </div>
@@ -410,13 +410,13 @@ export function PosClient(props: Props) {
   );
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Modal({ title, onClose, closeLabel, children }: { title: string; onClose: () => void; closeLabel: string; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(27,27,24,.45)" }} onClick={onClose}>
       <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-extrabold text-base">{title}</h3>
-          <button onClick={onClose} aria-label="close" style={{ color: "var(--ink-faint)" }}>✕</button>
+          <button onClick={onClose} aria-label={closeLabel} style={{ color: "var(--ink-faint)" }}>✕</button>
         </div>
         {children}
       </div>
@@ -448,7 +448,7 @@ function PaymentModal(props: {
     (method === "CREDIT" && !customerId);
 
   return (
-    <Modal title={t("payment")} onClose={props.onClose}>
+    <Modal closeLabel={t("closeLabel")} title={t("payment")} onClose={props.onClose}>
       <div className="text-center text-3xl font-extrabold mb-4">{formatETB(total, lang)}</div>
       <div className="grid grid-cols-3 gap-2 mb-4">
         {METHODS.map((m) => (

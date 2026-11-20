@@ -17,7 +17,7 @@ export function ProductForm({ t, mode }: { t: Record<string, string>; mode: "GRO
         <label className="field"><span>{t.cost}</span><input className="input" name="cost" type="number" step="0.01" min="0" /></label>
         <label className="field"><span>{t.unit}</span>
           <select className="input" name="unit" defaultValue="PIECE">
-            {["PIECE", "KG", "GRAM", "LITER", "BOTTLE", "BOX", "PACK"].map((u) => <option key={u}>{u}</option>)}
+            {["PIECE", "KG", "GRAM", "LITER", "BOTTLE", "BOX", "PACK"].map((u) => <option key={u} value={u}>{t[`unit_${u}`]}</option>)}
           </select>
         </label>
         <label className="field"><span>{t.openingStock}</span><input className="input" name="openingStock" type="number" step="0.001" min="0" /></label>

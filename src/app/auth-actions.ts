@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -41,13 +42,13 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
       tin: z.string().trim().max(20).optional(),
     })
     .safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { error: parsed.error.issues[0].message, values };
+  if (!parsed.success) return { error: await localized(parsed.error.issues[0].message), values };
   const phone = normalizePhone(parsed.data.phone);
-  if (!phone) return { error: "Enter a valid Ethiopian phone number", values };
+  if (!phone) return { error: await localized("Enter a valid Ethiopian phone number"), values };
 
   // Phone numbers are unique per tenant, but an owner should only ever have one shop per number.
   const taken = await db.user.findFirst({ where: { phone, role: "OWNER" } });
-  if (taken) return { error: "This phone number already has a shop. Sign in instead.", values };
+  if (taken) return { error: await localized("This phone number already has a shop. Sign in instead."), values };
 
   const pinHash = await bcrypt.hash(parsed.data.pin, 10);
   const user = await db.$transaction(async (tx) => {
@@ -71,11 +72,11 @@ export async function signup(_: FormState, form: FormData): Promise<FormState> {
 export async function login(_: FormState, form: FormData): Promise<FormState> {
   const phone = normalizePhone(String(form.get("phone") ?? ""));
   const pin = String(form.get("pin") ?? "");
-  const generic = { error: "Wrong phone number or PIN", values: { phone: String(form.get("phone") ?? "") } };
+  const generic = { error: await localized("Wrong phone number or PIN"), values: { phone: String(form.get("phone") ?? "") } };
   if (!phone || !pinSchema.safeParse(pin).success) return generic;
 
   const r = await checkLogin(phone, pin);
-  if ("error" in r) return { ...generic, error: r.error };
+  if ("error" in r) return { ...generic, error: await localized(r.error) };
   await startSession(r.userId);
   redirect("/app");
 }

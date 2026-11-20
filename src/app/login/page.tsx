@@ -4,9 +4,10 @@ import { getLang } from "@/lib/lang";
 import { LoginForm } from "./LoginForm";
 
 export default async function LoginPage() {
-  const t = translator(await getLang());
+  const lang = await getLang();
+  const t = translator(lang);
   return (
-    <AuthCard title={t("signIn")}>
+    <AuthCard title={t("signIn")} brand={t("appName")} lang={lang}>
       <LoginForm t={{ phone: t("phone"), pin: t("pin"), signIn: t("signIn"), noAccount: t("noAccount") }} />
     </AuthCard>
   );

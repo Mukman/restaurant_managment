@@ -6,6 +6,8 @@ Each shop picks a **business mode** at signup:
 - **Grocery**: barcode scanning, items sold by weight (kg), pay at the counter.
 - **Restaurant**: tables, waiters, open orders that are paid later.
 
+**Language:** every screen, receipt, error message and the Excel report can be shown in English or Amharic. The EN / አማ switch is on the sign-in page, in the top bar and on the phone. The choice is remembered on that device (a cookie), so each phone or till keeps its own language.
+
 Both modes share products, stock, payments, shifts, credit, refunds, suppliers and purchases.
 
 ## Stack

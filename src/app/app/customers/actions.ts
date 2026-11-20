@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
 import { addCustomer, CustomerError, recordRepayment, setCreditLimit } from "@/lib/customers";
@@ -12,9 +13,9 @@ async function run(fn: () => Promise<unknown>): Promise<CustomerFormState> {
     revalidatePath("/app", "layout");
     return { ok: true };
   } catch (e) {
-    if (e instanceof CustomerError) return { error: e.message };
+    if (e instanceof CustomerError) return { error: await localized(e.message) };
     console.error(e);
-    return { error: "Something went wrong. Try again." };
+    return { error: await localized("Something went wrong. Try again.") };
   }
 }
 

@@ -1,4 +1,5 @@
 "use server";
+import { localized } from "@/lib/errors";
 import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth";
 import { addStaff, resetStaffPin, setStaffActive, StaffError } from "@/lib/staff";
@@ -11,9 +12,9 @@ async function run(fn: () => Promise<void>): Promise<StaffFormState> {
     revalidatePath("/app/staff");
     return { ok: true };
   } catch (e) {
-    if (e instanceof StaffError) return { error: e.message };
+    if (e instanceof StaffError) return { error: await localized(e.message) };
     console.error(e);
-    return { error: "Something went wrong. Try again." };
+    return { error: await localized("Something went wrong. Try again.") };
   }
 }
 
