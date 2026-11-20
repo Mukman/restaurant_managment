@@ -75,7 +75,7 @@ export async function setStaffActive(s: SessionData, userId: string, active: boo
 export async function resetStaffPin(s: SessionData, userId: string, pin: string) {
   const u = await target(s, userId);
   if (!/^\d{4,6}$/.test(pin)) throw new StaffError("PIN must be 4–6 digits");
-  await db.user.update({ where: { id: u.id }, data: { pinHash: await bcrypt.hash(pin, 10) } });
+  await db.user.update({ where: { id: u.id }, data: { pinHash: await bcrypt.hash(pin, 10), failedAttempts: 0, lockedUntil: null } });
   await db.auditLog.create({
     data: { tenantId: s.tenantId, userId: s.userId, action: "staff.pin_reset", entity: "User", entityId: u.id },
   });

@@ -110,17 +110,19 @@ model Branch {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  branchId  String?
-  branch    Branch?  @relation(fields: [branchId], references: [id])
-  name      String
-  phone     String
-  pinHash   String? // staff sign in with phone + PIN
-  role      Role
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id             String    @id @default(cuid())
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+  branchId       String?
+  branch         Branch?   @relation(fields: [branchId], references: [id])
+  name           String
+  phone          String
+  pinHash        String? // staff sign in with phone + PIN
+  role           Role
+  active         Boolean   @default(true)
+  failedAttempts Int       @default(0) // wrong PINs in a row
+  lockedUntil    DateTime? // sign-in blocked until this time after too many wrong PINs
+  createdAt      DateTime  @default(now())
 
   cashierOrders Order[] @relation("cashier")
   waiterOrders  Order[] @relation("waiter")

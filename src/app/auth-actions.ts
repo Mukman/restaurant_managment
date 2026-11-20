@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { checkLogin } from "@/lib/lockout";
 import { normalizePhone } from "@/lib/phone";
 import { SESSION_COOKIE, sessionCookieOptions, signSession } from "@/lib/session";
 
@@ -73,15 +74,10 @@ export async function login(_: FormState, form: FormData): Promise<FormState> {
   const generic = { error: "Wrong phone number or PIN", values: { phone: String(form.get("phone") ?? "") } };
   if (!phone || !pinSchema.safeParse(pin).success) return generic;
 
-  // A phone can belong to staff at several shops; accept the first whose PIN matches.
-  const users = await db.user.findMany({ where: { phone, active: true }, take: 5 });
-  for (const u of users) {
-    if (u.pinHash && (await bcrypt.compare(pin, u.pinHash))) {
-      await startSession(u.id);
-      redirect("/app");
-    }
-  }
-  return generic;
+  const r = await checkLogin(phone, pin);
+  if ("error" in r) return { ...generic, error: r.error };
+  await startSession(r.userId);
+  redirect("/app");
 }
 
 export async function logout() {
