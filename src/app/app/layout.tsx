@@ -31,7 +31,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       role={s.role}
       nav={nav.map(({ href, label }) => ({ href, label }))}
       signOutLabel={t("signOut")}
-      menuLabel="Menu"
+      menuLabel={t("more")}
       logout={logout}
       badge={<span className="badge badge-ok">{tenant.mode === "RESTAURANT" ? t("restaurant") : t("grocery")}</span>}
       langToggle={<LangToggle lang={lang} />}
