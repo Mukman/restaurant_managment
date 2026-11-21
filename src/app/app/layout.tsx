@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/AppShell";
 import { LangToggle } from "@/components/LangToggle";
 import { requireSession } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getTenant } from "@/lib/tenant";
 import { translator, type DictKey } from "@/lib/i18n";
 import { getLang } from "@/lib/lang";
 import { logout } from "../auth-actions";
@@ -10,7 +10,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const s = await requireSession();
   const lang = await getLang();
   const t = translator(lang);
-  const tenant = await db.tenant.findUniqueOrThrow({ where: { id: s.tenantId } });
+  const tenant = await getTenant(s.tenantId);
   const nav = [
     { href: "/app", label: t("dashboard"), roles: ["OWNER", "MANAGER"] },
     { href: "/app/pos", label: t("pos"), roles: ["OWNER", "MANAGER", "CASHIER", "WAITER"] },

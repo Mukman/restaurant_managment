@@ -11,7 +11,7 @@ export default async function OrdersPage() {
   const t = translator(lang);
   const orders = await db.order.findMany({
     where: { tenantId: s.tenantId, branchId: s.branchId, status: { in: ["COMPLETED", "REFUNDED"] } },
-    include: { refunds: true, customer: true, table: true },
+    include: { refunds: { select: { amount: true } }, customer: { select: { name: true } }, table: { select: { label: true } } },
     orderBy: { closedAt: "desc" },
     take: 100,
   });

@@ -1,5 +1,6 @@
 import { requireSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getTenant } from "@/lib/tenant";
 import { getLang } from "@/lib/lang";
 import { currentShift } from "@/lib/shift";
 import { PosClient, type PosProduct, type OpenOrder } from "./PosClient";
@@ -11,10 +12,10 @@ export default async function PosPage() {
 
   const [shift, tenant, products, customers, tables, waiters, open] = await Promise.all([
     currentShift(s),
-    db.tenant.findUniqueOrThrow({ where: { id: s.tenantId } }),
+    getTenant(s.tenantId),
     db.product.findMany({
       where: { tenantId: s.tenantId, active: true },
-      include: { category: true, stock: { where: { branchId: s.branchId } } },
+      include: { category: { select: { name: true } }, stock: { where: { branchId: s.branchId }, select: { quantity: true } } },
       orderBy: { name: "asc" },
     }),
     db.customer.findMany({ where: { tenantId: s.tenantId }, orderBy: { name: "asc" } }),
