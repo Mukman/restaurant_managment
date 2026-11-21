@@ -129,6 +129,7 @@ model User {
   shifts        Shift[]
 
   @@unique([tenantId, phone])
+  @@index([tenantId, role])
 }
 
 model Category {
@@ -169,6 +170,7 @@ model Product {
 
   @@unique([tenantId, barcode])
   @@index([tenantId])
+  @@index([tenantId, active])
 }
 
 model StockLevel {
@@ -179,6 +181,7 @@ model StockLevel {
   quantity  Decimal @default(0) @db.Decimal(12, 3)
 
   @@id([productId, branchId])
+  @@index([branchId])
 }
 
 model StockMovement {
@@ -197,6 +200,7 @@ model StockMovement {
   createdAt DateTime     @default(now())
 
   @@index([tenantId, branchId, createdAt])
+  @@index([productId])
 }
 
 model Supplier {
@@ -273,6 +277,9 @@ model Order {
   @@unique([branchId, number])
   @@unique([tenantId, clientId])
   @@index([tenantId, createdAt])
+  @@index([tenantId, branchId, status, closedAt])
+  @@index([shiftId])
+  @@index([customerId])
 }
 
 model OrderItem {
@@ -288,6 +295,8 @@ model OrderItem {
   lineTotal Int
 
   refundItems RefundItem[]
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Payment {
@@ -299,6 +308,7 @@ model Payment {
   tendered  Int? // cash handed over, for change
   reference String? // Telebirr / CBE Birr / bank transaction id
   createdAt DateTime      @default(now())
+  @@index([orderId])
 }
 
 model Shift {
@@ -315,6 +325,8 @@ model Shift {
   openedAt     DateTime    @default(now())
   closedAt     DateTime?
   orders       Order[]
+  @@index([tenantId, branchId, status])
+  @@index([userId, status])
 }
 
 model AuditLog {

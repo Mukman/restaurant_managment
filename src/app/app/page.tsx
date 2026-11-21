@@ -24,7 +24,7 @@ export default async function Dashboard() {
     db.order.count({ where: { tenantId: s.tenantId, branchId: s.branchId, status: "OPEN" } }),
     db.stockLevel.findMany({
       where: { branchId: s.branchId, product: { tenantId: s.tenantId, active: true, tracksStock: true } },
-      include: { product: true },
+      select: { productId: true, quantity: true, product: { select: { name: true, nameAm: true, cost: true, minStock: true } } },
     }),
     db.customer.aggregate({ where: { tenantId: s.tenantId }, _sum: { creditBalance: true } }),
     db.supplier.aggregate({ where: { tenantId: s.tenantId }, _sum: { balance: true } }),
